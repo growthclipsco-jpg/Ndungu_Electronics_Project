@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ndungu Electronics IMS - Multi-Item POS Register</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {},
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {},
+          fontFamily: {
+            headline: ["Plus Jakarta Sans", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"],
+            body: ["Plus Jakarta Sans", "sans-serif"],
+            label: ["Plus Jakarta Sans", "sans-serif"],
+            mono: ["IBM Plex Mono", "monospace"]
+          },
+          fontSize: {}
+        },
+      },
+    }
+  </script>
+<style>
+    .font-mono-numbers {
+      font-family: 'IBM Plex Mono', monospace;
+      font-feature-settings: 'tnum' on, 'zero' on;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F8FAFC;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 font-body antialiased min-h-screen flex flex-col selection:bg-teal-100 selection:text-teal-900">
+<!-- ==================== LEFT FIXED SIDEBAR ==================== -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-white border-r border-slate-200 z-50 select-none">
+<!-- Brand Header -->
+<div class="p-4 border-b border-slate-200 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-teal-700 flex items-center justify-center text-white shadow-sm shadow-teal-700/20">
+<span class="material-symbols-outlined text-2xl" data-icon="bolt">bolt</span>
+</div>
+<div>
+<h1 class="text-base font-bold text-slate-900 tracking-tight leading-tight">Ndungu Electronics</h1>
+<p class="text-xs text-slate-500 font-medium">Thika Branch · IMS</p>
+</div>
+</div>
+</div>
+<!-- Quick Action / New Sale -->
+<div class="px-4 pt-4 pb-2">
+<button class="w-full flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-headline text-sm font-semibold py-2.5 px-4 rounded-lg shadow-sm hover:shadow transition-all duration-150 active:scale-[0.98]">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+<span>New Sale</span>
+</button>
+</div>
+<!-- Nav Items -->
+<nav class="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+<!-- 1. Dashboard -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- 2. Inventory -->
+<a class="flex items-center justify-between px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]" data-icon="inventory_2">inventory_2</span>
+<span>Inventory</span>
+</div>
+<span class="text-[11px] font-mono-numbers font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">84</span>
+</a>
+<!-- 3. POS Checkout (ACTIVE) -->
+<a class="flex items-center gap-3 px-3 py-2 text-teal-700 bg-teal-50 rounded-lg font-bold border-l-4 border-teal-700 text-sm" href="#">
+<span class="material-symbols-outlined text-[20px] text-teal-700" data-icon="point_of_sale" style="font-variation-settings: 'FILL' 1;">point_of_sale</span>
+<span class="flex-1">POS Checkout</span>
+<span class="w-2 h-2 rounded-full bg-teal-600 animate-pulse"></span>
+</a>
+<!-- 4. Promotions -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="local_offer">local_offer</span>
+<span>Promotions</span>
+</a>
+<!-- 5. Sales Ledger -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="receipt_long">receipt_long</span>
+<span>Sales Ledger</span>
+</a>
+<!-- 6. Reports -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+<span>Reports</span>
+</a>
+<!-- 7. Staff -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="badge">badge</span>
+<span>Staff</span>
+</a>
+</nav>
+<!-- Sidebar Footer -->
+<div class="p-3 border-t border-slate-200 space-y-1 bg-slate-50/50">
+<a class="flex items-center gap-3 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs font-medium transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="manage_accounts">manage_accounts</span>
+<span>Account Setup</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs font-medium transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<!-- User profile card -->
+<div class="mt-3 pt-3 border-t border-slate-200/80 flex items-center justify-between px-2">
+<div class="flex items-center gap-2.5 overflow-hidden">
+<div class="w-8 h-8 rounded-full bg-slate-800 text-teal-400 font-bold text-xs flex items-center justify-center shrink-0">
+            ND
+          </div>
+<div class="truncate">
+<p class="text-xs font-bold text-slate-900 truncate">ndungu</p>
+<p class="text-[10px] text-slate-500 truncate">Owner (Thika Branch)</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-base" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</aside>
+<!-- ==================== TOP STICKY BAR ==================== -->
+<header class="flex justify-between items-center h-16 px-6 ml-64 border-b border-slate-200 bg-white sticky top-0 z-40 shadow-sm">
+<!-- Left: Breadcrumb & Connection Status -->
+<div class="flex items-center gap-4">
+<nav class="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+<span>Thika Main Branch</span>
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="chevron_right">chevron_right</span>
+<span class="font-semibold text-slate-700">POS Terminal #01</span>
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="chevron_right">chevron_right</span>
+<span class="font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded text-[11px]">Active Register</span>
+</nav>
+<!-- Connection Pill -->
+<div class="hidden lg:flex items-center gap-2 px-2.5 py-1 bg-emerald-50 border border-emerald-200/60 rounded-full text-[11px] text-emerald-800">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+</span>
+<span class="font-medium font-mono-numbers">Node Online · Gateway 14ms · Local SQLite Replica</span>
+</div>
+</div>
+<!-- Right: Utility Actions & Status Badges -->
+<div class="flex items-center gap-2.5">
+<!-- Shift Badge -->
+<div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-md text-xs text-slate-600 border border-slate-200/80">
+<span class="material-symbols-outlined text-sm text-slate-500" data-icon="schedule">schedule</span>
+<span class="font-mono-numbers font-medium">Shift: Morning (08:00 - 17:00 EAT)</span>
+</div>
+<!-- Quick Action Buttons -->
+<button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-md hover:bg-amber-100 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="pause_circle">pause_circle</span>
+<span>Hold Sale (F6)</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+<span>Terminal Lock (Ctrl+L)</span>
+</button>
+<div class="h-5 w-px bg-slate-200 mx-1"></div>
+<!-- Notifications -->
+<button class="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg hover:bg-slate-100 transition-colors relative">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
+</button>
+<!-- Theme / Style indicator -->
+<button class="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="Toggle Daylight / Wireframe Noir">
+<span class="material-symbols-outlined text-xl" data-icon="dark_mode">dark_mode</span>
+</button>
+</div>
+</header>
+<!-- ==================== MAIN CONTENT AREA (SPLIT-PANE COUNTER) ==================== -->
+<main class="ml-64 p-6 bg-[#F8FAFC] flex-1">
+<div class="max-w-[1720px] mx-auto flex flex-col lg:flex-row gap-6 items-start">
+<!-- ================= LEFT PANE: 60% CATALOG & SEARCH ================= -->
+<div class="w-full lg:w-[58%] xl:w-[60%] flex flex-col gap-5">
+<!-- 1. Omnibar Search & Fast Barcode Bar -->
+<div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center gap-3">
+<div class="relative flex-1 w-full">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-xl" data-icon="barcode_scanner">barcode_scanner</span>
+</div>
+<input class="w-full pl-10 pr-24 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-700/30 focus:border-teal-700 focus:bg-white transition-all font-medium" placeholder="Scan barcode, serial, SKU, or type product name..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none gap-1">
+<span class="bg-white border border-slate-200 shadow-xs text-slate-500 text-[10px] font-mono-numbers px-1.5 py-0.5 rounded font-semibold">Ctrl + K</span>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto shrink-0 pt-1 sm:pt-0">
+<!-- Hardware scanner tag -->
+<div class="flex items-center gap-1.5 text-[11px] font-mono-numbers text-emerald-800 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+<span>USB HID Scanner Active</span>
+</div>
+<!-- Auto add toggle -->
+<label class="flex items-center gap-2 cursor-pointer select-none">
+<span class="text-xs font-semibold text-slate-600">Auto-add</span>
+<div class="relative">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-300 peer-focus:outline-0 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-700"></div>
+</div>
+</label>
+</div>
+</div>
+<!-- 2. Category Filter Pills -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-teal-700 text-white shadow-sm shrink-0 flex items-center gap-1.5">
+<span>All Products</span>
+<span class="bg-teal-800/80 text-[10px] font-mono-numbers px-1.5 py-0.2 rounded-full">84</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors shrink-0">
+            Televisions (12)
+          </button>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors shrink-0">
+            Laptops (8)
+          </button>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors shrink-0">
+            Smartphones (24)
+          </button>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors shrink-0">
+            Audio &amp; Systems (14)
+          </button>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors shrink-0">
+            Accessories &amp; Cables (26)
+          </button>
+</div>
+<!-- 3. Fast POS Catalog Grid (2 columns) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Card 1 (In cart - TV) -->
+<div class="bg-white border-2 border-teal-600/30 rounded-xl p-4 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-start justify-between gap-2 mb-2">
+<div>
+<span class="text-[10px] font-mono-numbers uppercase tracking-wider text-teal-800 bg-teal-50 px-2 py-0.5 rounded font-semibold border border-teal-100">
+                    SN-UA43-8842 · Serialized
+                  </span>
+<h3 class="text-sm font-bold text-slate-900 mt-1 leading-snug">Samsung 43" Crystal UHD 4K Smart TV</h3>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
+                  -10% Promo
+                </span>
+</div>
+<!-- Price & Stock -->
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-base font-bold font-mono-numbers text-slate-900">Kes. 38,500</span>
+<span class="text-xs font-mono-numbers text-slate-400 line-through">Kes. 42,000</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1.5 text-xs text-slate-500">
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="inventory">inventory</span>
+<span>3 in stock (<span class="font-medium text-slate-700">Thika Main Rack A1</span>)</span>
+</div>
+<!-- Serial dropdown -->
+<div class="mt-3">
+<label class="block text-[11px] font-semibold text-slate-600 mb-1">Assigned Serial</label>
+<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono-numbers text-slate-800">
+<span class="material-symbols-outlined text-sm text-teal-700" data-icon="qr_code_2">qr_code_2</span>
+<span class="font-medium truncate flex-1">SN-UA43-0019 (Shelved)</span>
+<span class="text-[10px] bg-teal-100 text-teal-800 font-semibold px-1 rounded">MATCHED</span>
+</div>
+</div>
+</div>
+<!-- In Cart Button state -->
+<div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+<span class="inline-flex items-center gap-1 text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-md">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>1 in Cart</span>
+</span>
+<button class="text-xs font-semibold text-slate-600 hover:text-teal-700 px-3 py-1 rounded hover:bg-slate-100 transition-colors">
+                + Add Another
+              </button>
+</div>
+</div>
+<!-- Card 2 (In cart - Headphones) -->
+<div class="bg-white border-2 border-teal-600/30 rounded-xl p-4 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-start justify-between gap-2 mb-2">
+<div>
+<span class="text-[10px] font-mono-numbers uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-semibold">
+                    AUD-SNY-520 · Bulk Stock
+                  </span>
+<h3 class="text-sm font-bold text-slate-900 mt-1 leading-snug">Sony WH-CH520 Wireless Headphones</h3>
+</div>
+<span class="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Audio</span>
+</div>
+<!-- Price & Stock -->
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-base font-bold font-mono-numbers text-slate-900">Kes. 6,750</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1.5 text-xs text-slate-500">
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="inventory">inventory</span>
+<span>18 in stock (<span class="font-medium text-slate-700">Drawer C2</span>)</span>
+</div>
+<div class="mt-3 p-2 bg-slate-50 rounded-lg border border-slate-100 text-xs text-slate-500 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="all_inbox">all_inbox</span>
+<span>Direct shelf pick · No barcode scan required</span>
+</div>
+</div>
+<!-- In Cart Button state -->
+<div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+<span class="inline-flex items-center gap-1 text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-md">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>1 in Cart</span>
+</span>
+<button class="text-xs font-semibold text-slate-600 hover:text-teal-700 px-3 py-1 rounded hover:bg-slate-100 transition-colors">
+                + Add Another
+              </button>
+</div>
+</div>
+<!-- Card 3: HP 15 Laptop -->
+<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between hover:border-slate-300 hover:shadow transition-all">
+<div>
+<div class="flex items-start justify-between gap-2 mb-2">
+<div>
+<span class="text-[10px] font-mono-numbers uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-semibold">
+                    SN-HP15-2207 · Serialized
+                  </span>
+<h3 class="text-sm font-bold text-slate-900 mt-1 leading-snug">HP 15 Laptop Core i5 12th Gen</h3>
+</div>
+<span class="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Computing</span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-base font-bold font-mono-numbers text-slate-900">Kes. 52,000</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1.5 text-xs text-slate-500">
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="inventory">inventory</span>
+<span>12 in stock (<span class="font-medium text-slate-700">Display Showcase 02</span>)</span>
+</div>
+<div class="mt-3">
+<select class="w-full text-xs font-mono-numbers bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-slate-700 focus:outline-none focus:border-teal-700">
+<option>Select Serial: HP-2207-X190 (In Box)</option>
+<option>Select Serial: HP-2207-X191 (In Box)</option>
+<option>Select Serial: HP-2207-X192 (In Box)</option>
+</select>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100">
+<button class="w-full py-2 bg-slate-100 hover:bg-teal-700 hover:text-white text-slate-700 font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sm" data-icon="add_shopping_cart">add_shopping_cart</span>
+<span>+ Add to Cart</span>
+</button>
+</div>
+</div>
+<!-- Card 4: LG 55" 4K Smart TV -->
+<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between hover:border-slate-300 hover:shadow transition-all">
+<div>
+<div class="flex items-start justify-between gap-2 mb-2">
+<div>
+<span class="text-[10px] font-mono-numbers uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-semibold">
+                    SN-LG55-9011 · Serialized
+                  </span>
+<h3 class="text-sm font-bold text-slate-900 mt-1 leading-snug">LG 55" 4K UHD Smart TV</h3>
+</div>
+<span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  Easter Deal
+                </span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-base font-bold font-mono-numbers text-slate-900">Kes. 64,000</span>
+<span class="text-xs font-mono-numbers text-slate-400 line-through">Kes. 68,000</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1.5 text-xs">
+<span class="material-symbols-outlined text-sm text-amber-600" data-icon="warning">warning</span>
+<span class="text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-mono-numbers font-semibold">4 Low Stock</span>
+<span class="text-slate-400 text-xs">· Rack A3</span>
+</div>
+<div class="mt-3">
+<select class="w-full text-xs font-mono-numbers bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-slate-700 focus:outline-none focus:border-teal-700">
+<option>Select Serial: LG-9011-881 (Floor Unit)</option>
+<option>Select Serial: LG-9011-882 (Sealed)</option>
+</select>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100">
+<button class="w-full py-2 bg-slate-100 hover:bg-teal-700 hover:text-white text-slate-700 font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sm" data-icon="add_shopping_cart">add_shopping_cart</span>
+<span>+ Add to Cart</span>
+</button>
+</div>
+</div>
+<!-- Card 5: SanDisk 64GB Flash Drive (Critical Stock) -->
+<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between hover:border-slate-300 hover:shadow transition-all">
+<div>
+<div class="flex items-start justify-between gap-2 mb-2">
+<div>
+<span class="text-[10px] font-mono-numbers uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-semibold">
+                    SD64-8890 · Bulk Non-Serialized
+                  </span>
+<h3 class="text-sm font-bold text-slate-900 mt-1 leading-snug">SanDisk 64GB Ultra Flash Drive</h3>
+</div>
+<span class="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Accessories</span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-base font-bold font-mono-numbers text-slate-900">Kes. 1,450</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1.5 text-xs">
+<span class="material-symbols-outlined text-sm text-rose-600" data-icon="error">error</span>
+<span class="text-rose-700 bg-rose-50 px-2 py-0.5 rounded font-mono-numbers font-bold">1 Crit Left</span>
+<span class="text-slate-400 text-xs">· Counter Bin 01</span>
+</div>
+<div class="mt-3 p-2 bg-amber-50/60 rounded-lg border border-amber-200/50 text-[11px] text-amber-900 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs text-amber-700" data-icon="info">info</span>
+<span>Replenishment order PO-771 in transit</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100">
+<button class="w-full py-2 bg-slate-100 hover:bg-teal-700 hover:text-white text-slate-700 font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sm" data-icon="add_shopping_cart">add_shopping_cart</span>
+<span>+ Add to Cart</span>
+</button>
+</div>
+</div>
+<!-- Card 6: Samsung Galaxy A24 -->
+<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between hover:border-slate-300 hover:shadow transition-all">
+<div>
+<div class="flex items-start justify-between gap-2 mb-2">
+<div>
+<span class="text-[10px] font-mono-numbers uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-semibold">
+                    SN-SMA24-5501 · Serialized
+                  </span>
+<h3 class="text-sm font-bold text-slate-900 mt-1 leading-snug">Samsung Galaxy A24 (128GB Black)</h3>
+</div>
+<span class="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Smartphones</span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-base font-bold font-mono-numbers text-slate-900">Kes. 24,500</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1.5 text-xs text-slate-500">
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="inventory">inventory</span>
+<span>15 in stock (<span class="font-medium text-slate-700">Safe Vault 01</span>)</span>
+</div>
+<div class="mt-3">
+<select class="w-full text-xs font-mono-numbers bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-slate-700 focus:outline-none focus:border-teal-700">
+<option>Select IMEI: 359124098129011</option>
+<option>Select IMEI: 359124098129012</option>
+</select>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100">
+<button class="w-full py-2 bg-slate-100 hover:bg-teal-700 hover:text-white text-slate-700 font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sm" data-icon="add_shopping_cart">add_shopping_cart</span>
+<span>+ Add to Cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Catalog Footer Quick Nav -->
+<div class="flex items-center justify-between text-xs text-slate-500 pt-2 px-1">
+<span>Showing 6 of 84 inventory products in Thika Main</span>
+<div class="flex items-center gap-2">
+<span class="font-mono-numbers">Page 1 of 14</span>
+<div class="flex gap-1">
+<button class="p-1 rounded bg-white border border-slate-200 text-slate-400 cursor-not-allowed">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_back_ios">arrow_back_ios</span>
+</button>
+<button class="p-1 rounded bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= RIGHT PANE: 40% STICKY ACTIVE COUNTER SALE ================= -->
+<div class="w-full lg:w-[42%] xl:w-[40%] sticky top-20">
+<div class="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden flex flex-col">
+<!-- 1. Cart Header -->
+<div class="p-4 bg-slate-50 border-b border-slate-200">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-teal-700 text-2xl" data-icon="shopping_basket">shopping_basket</span>
+<h2 class="text-base font-bold text-slate-900 tracking-tight">Active Counter Sale</h2>
+<span class="text-xs font-mono-numbers font-bold text-teal-800 bg-teal-100 px-2 py-0.5 rounded border border-teal-200">
+                  #THK-POS-4892
+                </span>
+</div>
+<button class="text-xs font-semibold text-rose-600 hover:text-rose-800 flex items-center gap-0.5 hover:underline">
+<span class="material-symbols-outlined text-sm" data-icon="delete_sweep">delete_sweep</span>
+<span>Clear Cart</span>
+</button>
+</div>
+<!-- Terminal Info Bar -->
+<div class="flex items-center justify-between text-xs text-slate-600 mt-2 pt-2 border-t border-slate-200/80">
+<div class="flex items-center gap-1.5 font-mono-numbers">
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="person">person</span>
+<span>Operator: <strong class="text-slate-800">ndungu</strong></span>
+</div>
+<div class="flex items-center gap-1.5 font-mono-numbers">
+<span class="material-symbols-outlined text-sm text-slate-400" data-icon="point_of_sale">point_of_sale</span>
+<span>Drawer #01</span>
+</div>
+</div>
+</div>
+<!-- 2. Cart Items List -->
+<div class="p-4 divide-y divide-slate-100 max-h-[310px] overflow-y-auto">
+<!-- Line Item 1 -->
+<div class="pb-3.5 pt-1">
+<div class="flex items-start justify-between gap-2">
+<div class="flex-1">
+<h4 class="text-xs font-bold text-slate-900 leading-snug">Samsung 43" Crystal UHD 4K Smart TV</h4>
+<!-- Serial Pill -->
+<div class="mt-1 flex items-center gap-1.5 flex-wrap">
+<span class="inline-flex items-center gap-1 text-[11px] font-mono-numbers bg-emerald-50 text-emerald-800 font-semibold px-2 py-0.5 rounded border border-emerald-200">
+<span class="material-symbols-outlined text-xs" data-icon="barcode">barcode</span>
+<span>SN: SN-UA43-0019</span>
+</span>
+<span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 font-medium">
+                      -10% Promo (-Kes. 3,850.00)
+                    </span>
+</div>
+</div>
+<button class="text-slate-400 hover:text-rose-600 transition-colors p-1" title="Remove Item">
+<span class="material-symbols-outlined text-base" data-icon="delete">delete</span>
+</button>
+</div>
+<!-- Price & Quantity row -->
+<div class="flex items-center justify-between mt-2.5">
+<div class="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+<button class="px-2 py-1 text-slate-600 hover:bg-slate-200 font-mono-numbers text-xs font-bold transition-colors">-</button>
+<span class="px-3 py-1 font-mono-numbers text-xs font-bold bg-white border-x border-slate-200">1</span>
+<button class="px-2 py-1 text-slate-600 hover:bg-slate-200 font-mono-numbers text-xs font-bold transition-colors">+</button>
+</div>
+<div class="text-right">
+<div class="text-xs font-mono-numbers text-slate-400 line-through">Kes. 42,000.00</div>
+<div class="text-sm font-bold font-mono-numbers text-slate-900">Kes. 38,500.00</div>
+</div>
+</div>
+</div>
+<!-- Line Item 2 -->
+<div class="pt-3.5">
+<div class="flex items-start justify-between gap-2">
+<div class="flex-1">
+<h4 class="text-xs font-bold text-slate-900 leading-snug">Sony WH-CH520 Wireless Headphones</h4>
+<div class="mt-1 flex items-center gap-1.5">
+<span class="inline-flex items-center gap-1 text-[11px] font-mono-numbers bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs" data-icon="inventory_2">inventory_2</span>
+<span>Bulk Stock · Non-serialized</span>
+</span>
+</div>
+</div>
+<button class="text-slate-400 hover:text-rose-600 transition-colors p-1" title="Remove Item">
+<span class="material-symbols-outlined text-base" data-icon="delete">delete</span>
+</button>
+</div>
+<!-- Price & Quantity row -->
+<div class="flex items-center justify-between mt-2.5">
+<div class="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+<button class="px-2 py-1 text-slate-600 hover:bg-slate-200 font-mono-numbers text-xs font-bold transition-colors">-</button>
+<span class="px-3 py-1 font-mono-numbers text-xs font-bold bg-white border-x border-slate-200">1</span>
+<button class="px-2 py-1 text-slate-600 hover:bg-slate-200 font-mono-numbers text-xs font-bold transition-colors">+</button>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold font-mono-numbers text-slate-900">Kes. 6,750.00</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. Customer & Loyalty / Promo Input -->
+<div class="p-3 bg-slate-50/80 border-y border-slate-200 flex flex-col gap-2">
+<!-- Customer Selector -->
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1 text-slate-600 font-medium">
+<span class="material-symbols-outlined text-sm text-teal-700" data-icon="badge">badge</span>
+<span>Customer: <strong class="text-slate-800">Walk-in Cash / Retail</strong></span>
+</div>
+<button class="text-teal-700 hover:text-teal-900 font-semibold underline text-[11px]">Change</button>
+</div>
+<!-- Promo Code Input with Applied Chip -->
+<div class="flex items-center gap-2 pt-1">
+<div class="relative flex-1">
+<input class="w-full pl-2.5 pr-20 py-1.5 text-xs font-mono-numbers bg-white border border-teal-300 rounded-lg text-teal-900 font-bold focus:outline-none" readonly="" type="text" value="THIKA5"/>
+<span class="absolute right-2 top-1.5 text-[10px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
+                  APPLIED
+                </span>
+</div>
+<button class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
+                Apply Code
+              </button>
+</div>
+</div>
+<!-- 4. Financial Ledger Breakdown -->
+<div class="p-4 bg-white space-y-1.5 font-mono-numbers text-xs border-b border-slate-200">
+<div class="flex justify-between text-slate-600">
+<span>Subtotal</span>
+<span class="font-semibold text-slate-800">Kes. 45,250.00</span>
+</div>
+<div class="flex justify-between text-emerald-700 font-medium">
+<span>Promo Discount (10% TV)</span>
+<span>-Kes. 3,850.00</span>
+</div>
+<div class="flex justify-between text-slate-600">
+<span>Post-Discount Subtotal</span>
+<span>Kes. 41,400.00</span>
+</div>
+<div class="flex justify-between text-slate-600">
+<span class="flex items-center gap-1">
+<span>+16% VAT</span>
+<span class="text-[10px] bg-slate-100 text-slate-500 px-1 rounded">KRA Tax</span>
+</span>
+<span class="font-semibold text-slate-800">Kes. 6,624.00</span>
+</div>
+<div class="h-px bg-slate-200 my-2"></div>
+<div class="flex justify-between items-baseline pt-1">
+<span class="text-sm font-headline font-bold text-slate-900">GRAND TOTAL</span>
+<div class="text-right">
+<span class="text-2xl font-bold text-teal-800 tracking-tight">Kes. 48,024.00</span>
+<p class="text-[10px] text-slate-400 font-body">Inclusive of all statutory taxes</p>
+</div>
+</div>
+</div>
+<!-- 5. Payment Processing Section -->
+<div class="p-4 bg-slate-50/70 border-b border-slate-200">
+<label class="block text-[11px] font-bold text-slate-500 tracking-wider uppercase mb-2">
+              Select Payment Method
+            </label>
+<!-- 3 Payment Method Tabs -->
+<div class="grid grid-cols-3 gap-2">
+<button class="flex flex-col items-center justify-center p-2 rounded-lg border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined text-lg mb-0.5" data-icon="payments">payments</span>
+<span class="text-xs font-semibold">Cash</span>
+</button>
+<!-- M-Pesa (ACTIVE) -->
+<button class="flex flex-col items-center justify-center p-2 rounded-lg border-2 border-teal-700 bg-teal-50 text-teal-900 font-bold relative shadow-xs">
+<span class="material-symbols-outlined text-lg mb-0.5 text-teal-700" data-icon="smartphone">smartphone</span>
+<span class="text-xs">M-Pesa</span>
+<span class="absolute -top-1.5 -right-1 text-[9px] bg-emerald-600 text-white font-bold px-1 rounded-full uppercase">Instant</span>
+</button>
+<button class="flex flex-col items-center justify-center p-2 rounded-lg border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined text-lg mb-0.5" data-icon="credit_card">credit_card</span>
+<span class="text-xs font-semibold">Card / PDQ</span>
+</button>
+</div>
+<!-- M-Pesa Verification Panel -->
+<div class="mt-3 bg-white p-2.5 rounded-lg border border-emerald-200 space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold text-slate-700">M-Pesa Confirmation Code</span>
+<span class="inline-flex items-center gap-0.5 text-[10px] font-mono-numbers font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
+                  Verified
+                </span>
+</div>
+<div class="relative">
+<input class="w-full text-xs font-mono-numbers uppercase tracking-wider font-bold bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-slate-900 focus:outline-none" type="text" value="SJK82910XY"/>
+<span class="absolute right-2 top-2 material-symbols-outlined text-emerald-600 text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex items-center gap-1.5 text-[10px] font-mono-numbers text-emerald-800">
+<span class="material-symbols-outlined text-xs text-emerald-600" data-icon="cloud_done">cloud_done</span>
+<span>M-Pesa API Verified · Till 884210 · Ksh 48,024.00</span>
+</div>
+</div>
+</div>
+<!-- 6. Action Buttons -->
+<div class="p-4 bg-white space-y-2">
+<button class="w-full py-3.5 bg-teal-700 hover:bg-teal-800 text-white font-headline text-sm font-bold rounded-lg shadow-sm hover:shadow flex items-center justify-center gap-2 transition-all active:scale-[0.99]">
+<span class="material-symbols-outlined text-lg" data-icon="receipt">receipt</span>
+<span>Complete Sale &amp; Generate Receipt (Enter)</span>
+</button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-2 px-3 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="call_split">call_split</span>
+<span>Split Payment</span>
+</button>
+<button class="py-2 px-3 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="print">print</span>
+<span>Print Proforma</span>
+</button>
+</div>
+</div>
+<!-- 7. Security / Hardware Compliance footer -->
+<div class="p-2.5 bg-slate-100 border-t border-slate-200 text-center text-[10px] font-mono-numbers text-slate-500 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-xs text-emerald-600" data-icon="lock_clock">lock_clock</span>
+<span>ETR / TIMS Middleware Synced · KRA Signature Ready · Hardware Terminal: THK-POS-8842</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

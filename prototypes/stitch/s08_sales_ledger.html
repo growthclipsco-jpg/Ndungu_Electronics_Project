@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ndungu Electronics IMS - Sales Ledger &amp; Void Management</title>
+<!-- Google Fonts: Plus Jakarta Sans & IBM Plex Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {},
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            headline: ["Plus Jakarta Sans", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"],
+            body: ["Plus Jakarta Sans", "sans-serif"],
+            label: ["Plus Jakarta Sans", "sans-serif"],
+            mono: ["IBM Plex Mono", "monospace"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .font-mono-numbers {
+      font-family: 'IBM Plex Mono', monospace;
+      font-feature-settings: 'tnum' on, 'zero' on;
+    }
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-body antialiased min-h-screen flex selection:bg-teal-100 selection:text-teal-900">
+<!-- ================= PERSISTENT LEFT SIDEBAR ================= -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col justify-between p-4 border-r border-slate-200 bg-white z-30">
+<div class="flex flex-col gap-5">
+<!-- Header Brand -->
+<div class="flex items-center gap-3 px-2 py-1">
+<div class="w-10 h-10 rounded-lg bg-teal-700 flex items-center justify-center text-white font-headline font-bold text-lg shadow-sm">
+          NE
+        </div>
+<div class="overflow-hidden">
+<div class="text-base font-bold text-slate-900 tracking-tight font-headline truncate">Ndungu Electronics</div>
+<div class="text-xs text-slate-500 font-medium">Thika Branch · IMS</div>
+</div>
+</div>
+<!-- Quick Action CTA -->
+<button class="w-full py-2.5 px-3 bg-teal-700 hover:bg-teal-800 text-white font-headline font-semibold text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.99]">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>New Sale</span>
+</button>
+<!-- Main Navigation Menu -->
+<nav class="flex flex-col gap-1">
+<!-- 1. Dashboard -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-slate-500">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- 2. Inventory -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-slate-500">inventory_2</span>
+<span>Inventory</span>
+</a>
+<!-- 3. POS Checkout -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-slate-500">point_of_sale</span>
+<span>POS Checkout</span>
+</a>
+<!-- 4. Promotions -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-slate-500">local_offer</span>
+<span>Promotions</span>
+</a>
+<!-- 5. Sales Ledger (ACTIVE TAB) -->
+<a class="flex items-center gap-3 px-3 py-2 text-teal-700 bg-teal-50 rounded-lg font-bold border-l-4 border-teal-700 text-sm" href="#">
+<span class="material-symbols-outlined text-teal-700" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span>Sales Ledger</span>
+</a>
+<!-- 6. Reports -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-slate-500">analytics</span>
+<span>Reports</span>
+</a>
+<!-- 7. Staff -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-slate-500">badge</span>
+<span>Staff</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Bottom / Footer Controls -->
+<div class="flex flex-col gap-3 pt-3 border-t border-slate-200">
+<!-- Fiscal Status Live Pill -->
+<div class="bg-emerald-50 border border-emerald-200/80 rounded-lg p-2.5 flex items-start gap-2 text-xs">
+<span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse mt-1 shrink-0"></span>
+<div class="leading-tight">
+<div class="font-bold text-emerald-900">KRA TIMS v2.4 LIVE</div>
+<div class="font-mono-numbers text-[10px] text-emerald-700">ESRD-8941 · Ready</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-slate-500 text-[18px]">manage_accounts</span>
+<span>Account Setup</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-slate-500 text-[18px]">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- ================= MAIN CONTENT WRAPPER ================= -->
+<div class="flex-1 ml-64 flex flex-col min-w-0">
+<!-- Top Navigation & Breadcrumb Omnibar -->
+<header class="sticky top-0 z-20 flex justify-between items-center h-16 px-6 border-b border-slate-200 bg-white/95 backdrop-blur-md">
+<!-- Left side: Breadcrumb & Search Omnibar -->
+<div class="flex items-center gap-4 flex-1 max-w-2xl">
+<div class="flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0">
+<span class="font-semibold text-slate-800">Thika Branch · POS Terminal #01</span>
+<span class="text-slate-300">/</span>
+<span>Sales Ledger</span>
+<span class="text-slate-300">/</span>
+<span class="text-teal-700 font-semibold">Transaction Journal &amp; Void Management</span>
+</div>
+<!-- Quick Fast Search Omnibar -->
+<div class="relative w-full max-w-sm ml-2">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-12 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-700 focus:border-teal-700 text-slate-800 placeholder-slate-400" placeholder="Search receipt #RCP, M-Pesa ref, customer..." type="text"/>
+<span class="absolute right-2 top-2 font-mono text-[10px] bg-white text-slate-400 border border-slate-200 px-1 rounded shadow-2xs">Ctrl K</span>
+</div>
+</div>
+<!-- Right side controls: Node status, view tabs, actions & user -->
+<div class="flex items-center gap-3">
+<!-- Node Online status pill -->
+<div class="hidden xl:flex items-center gap-1.5 bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>Node Online</span>
+<span class="text-slate-400">·</span>
+<span class="font-mono-numbers text-[11px] text-slate-700">14ms</span>
+<span class="text-slate-400">·</span>
+<span class="text-[11px]">Local SQLite</span>
+</div>
+<!-- View State Pills -->
+<div class="hidden md:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold">
+<button class="px-2.5 py-1 bg-white text-teal-800 rounded shadow-xs">Completed &amp; Voided</button>
+<button class="px-2 py-1 text-slate-500 hover:text-slate-800">Skeleton</button>
+<button class="px-2 py-1 text-slate-500 hover:text-slate-800">Empty State</button>
+</div>
+<div class="h-5 w-px bg-slate-200 mx-1"></div>
+<!-- Utility icons -->
+<button class="text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md p-1.5 transition-colors" title="Toggle Theme">
+<span class="material-symbols-outlined text-[20px]">dark_mode</span>
+</button>
+<button class="text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md p-1.5 transition-colors relative" title="Notifications">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-teal-600 rounded-full"></span>
+</button>
+<button class="text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md p-1.5 transition-colors" title="Support Help">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+</button>
+<!-- User Badge -->
+<div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+<div class="w-8 h-8 rounded-full bg-teal-900 text-teal-100 flex items-center justify-center font-bold text-xs">
+            N
+          </div>
+<div class="leading-none text-left">
+<div class="text-xs font-bold text-slate-800">ndungu</div>
+<div class="text-[10px] text-teal-700 font-semibold">Owner</div>
+</div>
+</div>
+</div>
+</header>
+<!-- ================= CANVAS BODY ================= -->
+<main class="p-6 space-y-6">
+<!-- TOP DATE-RANGE & FILTER TOOLBAR -->
+<section class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<!-- Left: Date Picker + Quick Presets -->
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs">
+<span class="material-symbols-outlined text-slate-400 text-[18px]">calendar_today</span>
+<span class="text-slate-500 font-medium">From:</span>
+<span class="font-mono-numbers font-semibold text-slate-800">18/04/2026</span>
+<span class="text-slate-300">→</span>
+<span class="text-slate-500 font-medium">To:</span>
+<span class="font-mono-numbers font-semibold text-slate-800">18/04/2026</span>
+<span class="ml-2 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Date Range Valid (Today)
+              </span>
+</div>
+<!-- Quick Presets -->
+<div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-xs font-medium">
+<button class="px-2.5 py-1 bg-white text-teal-800 rounded font-semibold shadow-xs">Today</button>
+<button class="px-2.5 py-1 text-slate-600 hover:text-slate-900">Yesterday</button>
+<button class="px-2.5 py-1 text-slate-600 hover:text-slate-900">Last 7 Days</button>
+<button class="px-2.5 py-1 text-slate-600 hover:text-slate-900">This Month (April)</button>
+</div>
+</div>
+<!-- Right: Actions -->
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px] text-slate-600">table_view</span>
+<span>Export CSV / Excel</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px] text-slate-600">print</span>
+<span>Print Daily Journal</span>
+</button>
+</div>
+</div>
+<!-- Filter Chips Row -->
+<div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+<!-- Payment Method Filters -->
+<div class="flex items-center gap-2">
+<span class="text-slate-400 font-medium">Payment:</span>
+<div class="flex items-center gap-1.5">
+<span class="px-2.5 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 font-bold">All (15)</span>
+<span class="px-2.5 py-1 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium cursor-pointer">M-Pesa (10)</span>
+<span class="px-2.5 py-1 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium cursor-pointer">Cash (4)</span>
+<span class="px-2.5 py-1 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium cursor-pointer">Card (1)</span>
+</div>
+</div>
+<!-- Cashier Dropdown Filter -->
+<div class="flex items-center gap-2">
+<span class="text-slate-400 font-medium">Cashier Shift:</span>
+<select class="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-medium rounded-lg px-2.5 py-1 focus:ring-1 focus:ring-teal-700">
+<option selected="">All Operators (kamau [Shift #04], j.mwangi, ndungu)</option>
+<option>kamau · Shift #04 (Active)</option>
+<option>j.mwangi · Shift #02</option>
+<option>ndungu · Owner Override</option>
+</select>
+</div>
+</div>
+</section>
+<!-- KPI STAT CARDS ROW (3 CARDS BENTO) -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<!-- Card 1: Filtered Transactions -->
+<div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Filtered Transactions</p>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-headline font-bold text-3xl text-slate-900">14</span>
+<span class="text-xs text-slate-400 font-medium font-mono-numbers">of 15 total today</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">receipt_long</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+<span class="text-emerald-700 font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">trending_up</span> +3 vs yesterday
+            </span>
+<span class="text-slate-400">93.3% clearance</span>
+</div>
+</div>
+<!-- Card 2: Net Revenue -->
+<div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Net Revenue (Excl. Voids)</p>
+<div class="mt-2">
+<span class="font-mono-numbers font-bold text-2xl lg:text-3xl text-slate-900">Kes. 318,450.00</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">payments</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1 text-xs">
+<span class="font-mono-numbers text-slate-500">16% VAT: <strong class="text-slate-700">Kes. 43,924.14</strong></span>
+<span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded font-semibold text-[11px]">+11.8% vs last week</span>
+</div>
+</div>
+<!-- Card 3: Voided Sales -->
+<div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<p class="text-xs font-semibold text-rose-700 uppercase tracking-wider flex items-center gap-1">
+<span>Voided Sales</span>
+<span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-1.5 py-0.2 rounded">1 Excluded</span>
+</p>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-mono-numbers font-bold text-3xl text-rose-600">Kes. 16,500.00</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">do_not_disturb_on</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+<span class="text-amber-800 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-amber-600">inventory</span> 1 item restored to shelf
+            </span>
+<span class="text-slate-400 font-mono-numbers">#RCP-2026-038</span>
+</div>
+</div>
+</section>
+<!-- PAGINATED TRANSACTIONS TABLE SECTION -->
+<section class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+<div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+<div class="flex items-center gap-2">
+<h2 class="text-sm font-bold text-slate-800 font-headline">Audited Transaction Journal</h2>
+<span class="text-xs text-slate-500 font-medium">· 25 records / page</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="inline-flex items-center gap-1 text-slate-500">
+<span class="w-2 h-2 rounded-full bg-teal-600"></span> Live KRA TIMS middleware feed
+            </span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs border-collapse">
+<thead class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+<tr>
+<th class="py-3 px-4">Receipt #</th>
+<th class="py-3 px-4">Timestamp</th>
+<th class="py-3 px-4">Items Summary</th>
+<th class="py-3 px-4">Payment &amp; Reference</th>
+<th class="py-3 px-4">Cashier Snapshot</th>
+<th class="py-3 px-4 text-right">VAT &amp; Total</th>
+<th class="py-3 px-4 text-center">Status</th>
+<th class="py-3 px-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 font-medium text-slate-700">
+<!-- ROW 1: Completed -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 font-mono-numbers font-semibold text-slate-900">
+<span class="w-2 h-2 rounded-full bg-emerald-500" title="KRA Verified"></span>
+<span>#RCP-2026-041</span>
+<button class="text-slate-400 hover:text-slate-700" title="Copy receipt number">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono-numbers text-slate-600 whitespace-nowrap">
+                  14:32:08 EAT
+                  <span class="text-[10px] text-slate-400 block font-sans">Today</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-900">Samsung 43" 4K Smart TV <span class="text-slate-400 font-mono-numbers">(x1)</span></div>
+<div class="text-slate-500 text-[11px]">Sony WH-CH520 Wireless Headset (x1)</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+<span class="font-bold text-[10px] uppercase">M-Pesa</span>
+<span class="font-mono-numbers font-semibold">SJK82910XY</span>
+</div>
+<div class="text-[10px] text-slate-400 font-mono-numbers mt-0.5">Till: 884210</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-teal-100 text-teal-800 text-[11px] font-bold flex items-center justify-center">K</div>
+<div>
+<span class="font-semibold text-slate-800">kamau</span>
+<span class="text-[10px] text-slate-400 block">Shift #04</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="font-mono-numbers font-bold text-slate-900 text-sm">Kes. 48,024.00</div>
+<div class="font-mono-numbers text-[10px] text-slate-400">VAT: Kes. 6,624.00</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Completed
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded text-xs font-semibold">View</button>
+<button class="px-2 py-1 bg-white border border-slate-200 hover:text-rose-600 text-slate-400 rounded text-xs font-medium">Void</button>
+</div>
+</td>
+</tr>
+<!-- ROW 2: Completed -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 font-mono-numbers font-semibold text-slate-900">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>#RCP-2026-040</span>
+<button class="text-slate-400 hover:text-slate-700">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono-numbers text-slate-600 whitespace-nowrap">
+                  14:18:41 EAT
+                  <span class="text-[10px] text-slate-400 block font-sans">Today</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-900">TP-Link Archer AX12 WiFi 6 Router <span class="text-slate-400 font-mono-numbers">(x2)</span></div>
+<div class="text-slate-500 text-[11px]">Gigabit Dual Band Wireless</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+<span class="material-symbols-outlined text-[13px]">payments</span>
+<span>Cash</span>
+</div>
+<div class="text-[10px] text-slate-400 font-mono-numbers mt-0.5">Drawer #01 Verified</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-teal-100 text-teal-800 text-[11px] font-bold flex items-center justify-center">K</div>
+<div>
+<span class="font-semibold text-slate-800">kamau</span>
+<span class="text-[10px] text-slate-400 block">Shift #04</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="font-mono-numbers font-bold text-slate-900 text-sm">Kes. 11,200.00</div>
+<div class="font-mono-numbers text-[10px] text-slate-400">VAT: Kes. 1,544.82</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Completed
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded text-xs font-semibold">View</button>
+<button class="px-2 py-1 bg-white border border-slate-200 hover:text-rose-600 text-slate-400 rounded text-xs font-medium">Void</button>
+</div>
+</td>
+</tr>
+<!-- ROW 3: Completed -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 font-mono-numbers font-semibold text-slate-900">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>#RCP-2026-039</span>
+<button class="text-slate-400 hover:text-slate-700">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono-numbers text-slate-600 whitespace-nowrap">
+                  13:54:19 EAT
+                  <span class="text-[10px] text-slate-400 block font-sans">Today</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-900">Anker PowerCore 20000mAh PD</div>
+<div class="text-slate-500 text-[11px]">Braided Type-C Fast Cables <span class="text-slate-400 font-mono-numbers">(x4)</span></div>
+</td>
+<td class="py-3.5 px-4">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+<span class="font-bold text-[10px] uppercase">M-Pesa</span>
+<span class="font-mono-numbers font-semibold">SJK77192AB</span>
+</div>
+<div class="text-[10px] text-slate-400 font-mono-numbers mt-0.5">Till: 884210</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold flex items-center justify-center">J</div>
+<div>
+<span class="font-semibold text-slate-800">j.mwangi</span>
+<span class="text-[10px] text-slate-400 block">Shift #02</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="font-mono-numbers font-bold text-slate-900 text-sm">Kes. 14,850.00</div>
+<div class="font-mono-numbers text-[10px] text-slate-400">VAT: Kes. 2,048.27</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Completed
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded text-xs font-semibold">View</button>
+<button class="px-2 py-1 bg-white border border-slate-200 hover:text-rose-600 text-slate-400 rounded text-xs font-medium">Void</button>
+</div>
+</td>
+</tr>
+<!-- ROW 4: TARGET VOIDED SALE (SPECIAL EMPHASIS & HIGHLIGHT) -->
+<tr class="bg-rose-50/40 border-l-4 border-l-rose-500 hover:bg-rose-50/70 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 font-mono-numbers font-semibold text-rose-800">
+<span class="w-2 h-2 rounded-full bg-rose-500"></span>
+<span class="line-through decoration-rose-500">#RCP-2026-038</span>
+<button class="text-rose-400 hover:text-rose-700">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+<span class="font-mono-numbers text-[10px] text-rose-600">CRN-2026-004</span>
+</td>
+<td class="py-3.5 px-4 font-mono-numbers text-slate-500 whitespace-nowrap">
+                  13:42:01 EAT
+                  <span class="text-[10px] text-rose-500 block font-semibold">Voided 14:02 EAT</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-800 line-through decoration-slate-400">SanDisk 1TB Extreme Portable SSD</div>
+<div class="text-rose-700 text-[11px] font-mono-numbers flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[12px]">keyboard_return</span> Serial SN-SD1TB-9941 Restocked
+                  </div>
+</td>
+<td class="py-3.5 px-4">
+<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+<span class="material-symbols-outlined text-[13px]">credit_card</span>
+<span class="font-mono-numbers font-medium">PDQ Auth #99214</span>
+</div>
+<div class="text-[10px] text-rose-600 font-medium mt-0.5">Refund processed</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-teal-900 text-teal-100 text-[11px] font-bold flex items-center justify-center">N</div>
+<div>
+<span class="font-semibold text-slate-900">ndungu</span>
+<span class="text-[10px] text-teal-700 block font-bold">Owner Authorized</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="font-mono-numbers font-bold text-rose-700 text-sm line-through">Kes. 16,500.00</div>
+<div class="font-mono-numbers text-[10px] text-slate-400">Restored to Shelf</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+<span class="material-symbols-outlined text-[13px]">cancel</span> Voided - Returned
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded text-xs font-semibold">View Log</button>
+<button class="px-2 py-1 bg-rose-50 border border-rose-200 text-rose-700 rounded text-xs font-bold" disabled="">Voided</button>
+</div>
+</td>
+</tr>
+<!-- ROW 5: Completed -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-1.5 font-mono-numbers font-semibold text-slate-900">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>#RCP-2026-037</span>
+<button class="text-slate-400 hover:text-slate-700">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono-numbers text-slate-600 whitespace-nowrap">
+                  13:15:30 EAT
+                  <span class="text-[10px] text-slate-400 block font-sans">Today</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-900">HDMI 2.1 3m Gold Cable</div>
+<div class="text-slate-500 text-[11px]">Type-C OTG Aluminum Adapter</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+<span class="material-symbols-outlined text-[13px]">payments</span>
+<span>Cash</span>
+</div>
+<div class="text-[10px] text-slate-400 font-mono-numbers mt-0.5">Drawer #01 Verified</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-teal-100 text-teal-800 text-[11px] font-bold flex items-center justify-center">K</div>
+<div>
+<span class="font-semibold text-slate-800">kamau</span>
+<span class="text-[10px] text-slate-400 block">Shift #04</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="font-mono-numbers font-bold text-slate-900 text-sm">Kes. 2,400.00</div>
+<div class="font-mono-numbers text-[10px] text-slate-400">VAT: Kes. 331.03</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Completed
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded text-xs font-semibold">View</button>
+<button class="px-2 py-1 bg-white border border-slate-200 hover:text-rose-600 text-slate-400 rounded text-xs font-medium">Void</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="p-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50 text-xs">
+<div class="flex items-center gap-2 text-slate-600">
+<span>Showing <strong class="text-slate-900 font-semibold">1 to 5</strong> of <strong class="text-slate-900 font-semibold">14</strong> filtered transactions</span>
+<span class="text-slate-300">·</span>
+<span class="text-slate-500 inline-flex items-center gap-1 font-mono-numbers text-[11px]">
+<span class="material-symbols-outlined text-[14px] text-teal-700">sync</span> Audit Log auto-synced with SQLite replica
+            </span>
+</div>
+<!-- Pagination Controls -->
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1 bg-white border border-slate-200 text-slate-400 rounded cursor-not-allowed">Previous</button>
+<button class="px-3 py-1 bg-teal-700 text-white rounded font-bold">1</button>
+<button class="px-3 py-1 bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 rounded">2</button>
+<button class="px-2.5 py-1 bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 rounded">Next</button>
+</div>
+</div>
+</section>
+<!-- AUDIT FOOTER BAR -->
+<footer class="pt-4 pb-2 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-500 font-mono-numbers">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-teal-700 text-[16px]">verified_user</span>
+<span>Audited by <strong class="text-slate-800">ndungu</strong> · Thika Store Master</span>
+<span class="text-slate-300">|</span>
+<span>IMS v2.4.1</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-emerald-700 font-semibold">KRA TIMS Credit Note &amp; Void Sync Ready</span>
+<span class="text-slate-300">|</span>
+<span class="text-slate-600">Hardware ID: THK-POS-8842</span>
+</div>
+</footer>
+</main>
+</div>
+<!-- ================= VOID SALE CONFIRMATION MODAL OVERLAY ================= -->
+<!-- Displayed as active/open centered modal to demonstrate the Owner-Only Void Management experience -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+<!-- Modal Card Dialog -->
+<div class="w-full max-w-lg bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
+<!-- Modal Header -->
+<div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-slate-900 text-base leading-tight">Void Sale #RCP-2026-038</h3>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.2 rounded border border-rose-200">
+<span class="material-symbols-outlined text-[13px]">lock</span> Owner Authorization Required
+            </span>
+</div>
+</div>
+<button class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-200/60 transition-colors" title="Close modal">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body Content -->
+<div class="p-6 space-y-4">
+<!-- Transaction Summary Bento Banner -->
+<div class="bg-slate-50 rounded-lg p-3.5 border border-slate-200 text-xs space-y-2">
+<div class="flex justify-between items-start">
+<span class="text-slate-500 font-medium">Target Receipt:</span>
+<span class="font-mono-numbers font-bold text-slate-900">#RCP-2026-038</span>
+</div>
+<div class="flex justify-between items-start">
+<span class="text-slate-500 font-medium">Original Amount:</span>
+<span class="font-mono-numbers font-bold text-base text-slate-900">Kes. 16,500.00 <span class="text-xs font-normal text-slate-500">(Card PDQ)</span></span>
+</div>
+<div class="flex justify-between items-start">
+<span class="text-slate-500 font-medium">Item Details:</span>
+<div class="text-right">
+<div class="font-semibold text-slate-900">SanDisk 1TB Extreme Portable SSD</div>
+<div class="font-mono-numbers text-[11px] text-teal-700">Serial: SN-SD1TB-9941</div>
+</div>
+</div>
+<div class="flex justify-between items-center pt-1 border-t border-slate-200">
+<span class="text-slate-500 font-medium">Sold By Cashier:</span>
+<span class="text-slate-700 font-medium">kamau at 13:42:01 EAT (Shift #04)</span>
+</div>
+</div>
+<!-- Warning Callout Box -->
+<div class="p-3.5 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2.5 text-xs text-amber-900">
+<span class="material-symbols-outlined text-amber-700 text-[18px] shrink-0 mt-0.5">report</span>
+<div class="leading-relaxed">
+<strong class="font-bold">Irreversible KRA TIMS &amp; Stock Action:</strong> Voiding this transaction will mark the fiscal receipt as <span class="font-bold underline">VOID</span> in TIMS middleware, emit Credit Note <span class="font-mono-numbers">#CRN-2026-004</span>, and immediately restock 1 unit back to <strong class="text-amber-950 font-bold">Thika Rack A1-D4</strong> inventory.
+          </div>
+</div>
+<!-- Input Field: Void Reason -->
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">
+            Void Reason / Justification <span class="text-rose-500">*</span>
+</label>
+<div class="relative">
+<input class="w-full text-xs py-2 px-3 bg-white border border-slate-300 rounded-lg focus:ring-1 focus:ring-rose-500 focus:border-rose-500 font-medium text-slate-800" type="text" value="Customer returned unopened unit - exchanged preference"/>
+</div>
+<p class="text-[11px] text-slate-400 mt-1">Required for KRA fiscal audit log and weekly variance report.</p>
+</div>
+<!-- Input Field: Owner Security PIN -->
+<div>
+<div class="flex justify-between items-center mb-1">
+<label class="text-xs font-bold text-slate-700">Owner Security PIN / Override Key <span class="text-rose-500">*</span></label>
+<span class="text-[10px] text-teal-700 font-bold bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
+              ndungu (Owner Authenticated)
+            </span>
+</div>
+<div class="relative">
+<input class="w-full text-sm py-2 px-3 font-mono bg-white border border-slate-300 rounded-lg tracking-widest text-slate-900 focus:ring-1 focus:ring-rose-500 focus:border-rose-500" type="password" value="••••"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-slate-400 text-[18px]">verified</span>
+</div>
+</div>
+<!-- Stock Action Checkbox -->
+<div class="pt-1">
+<label class="flex items-start gap-2 cursor-pointer select-none">
+<input checked="" class="mt-0.5 rounded text-teal-700 focus:ring-teal-700 border-slate-300" type="checkbox"/>
+<span class="text-xs font-semibold text-slate-800">
+              Automatically restore serial <span class="font-mono-numbers text-teal-700">SN-SD1TB-9941</span> to Available shelf inventory
+            </span>
+</label>
+</div>
+</div>
+<!-- Modal Footer Buttons -->
+<div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+<button class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg transition-colors">
+          Cancel / Dismiss
+        </button>
+<button class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-all duration-150 active:scale-[0.99]">
+<span class="material-symbols-outlined text-[16px]">delete_forever</span>
+<span>Confirm Void &amp; Restore Stock</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

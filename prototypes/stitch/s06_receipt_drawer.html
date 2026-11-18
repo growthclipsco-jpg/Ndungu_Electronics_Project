@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S-06 Printable Receipt &amp; Slide-Over Preview · Ndungu Electronics IMS</title>
+<!-- Fonts: Plus Jakarta Sans & IBM Plex Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Google Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal: "#0F766E",
+              tealHover: "#115E59",
+              tealLight: "#CCFBF1",
+              slate: "#0F172A",
+              canvas: "#F8FAFC",
+              muted: "#475569"
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Plus Jakarta Sans", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"],
+            body: ["Plus Jakarta Sans", "sans-serif"],
+            label: ["Plus Jakarta Sans", "sans-serif"],
+            mono: ["'IBM Plex Mono'", "monospace"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+    
+    /* Subtle serrated tear-edge paper pattern */
+    .receipt-tear-top {
+      background: radial-gradient(circle at 10px -5px, transparent 12px, #ffffff 13px) repeat-x;
+      background-size: 20px 15px;
+    }
+    .receipt-tear-bottom {
+      background: radial-gradient(circle at 10px 19px, transparent 12px, #ffffff 13px) repeat-x;
+      background-size: 20px 15px;
+    }
+    
+    /* Custom barcode aesthetic simulation */
+    .barcode-line {
+      display: inline-block;
+      background-color: #0f172a;
+      height: 42px;
+    }
+
+    /* Custom scrollbar for receipt preview */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-[#0F172A] font-body min-h-screen flex flex-col antialiased selection:bg-teal-100 selection:text-teal-900 overflow-x-hidden">
+<!-- ========================================================================= -->
+<!-- 1. LEFT SIDEBAR COMPONENT (From Shared Components JSON)                   -->
+<!-- ========================================================================= -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col border-r border-slate-200 bg-white z-30 justify-between p-4">
+<!-- Header/Logo Area -->
+<div class="flex flex-col gap-5">
+<div class="flex items-center gap-3 px-2 py-1">
+<div class="w-10 h-10 rounded-lg bg-teal-800 flex items-center justify-center text-white font-headline font-bold text-xl shadow-sm tracking-tight ring-2 ring-teal-600/30">
+          N
+        </div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 tracking-tight leading-tight">Ndungu Electronics</span>
+<span class="text-xs font-mono text-slate-500 tracking-normal">Thika Branch · IMS</span>
+</div>
+</div>
+<!-- Action Button CTA -->
+<button class="w-full bg-[#0F766E] hover:bg-[#115E59] active:scale-[0.99] text-white font-headline font-semibold text-sm py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span>
+<span>New Sale</span>
+</button>
+<!-- Primary Navigation Links -->
+<nav class="flex flex-col gap-1">
+<!-- 1. Dashboard -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium font-headline text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- 2. Inventory -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium font-headline text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span>Inventory</span>
+</a>
+<!-- 3. POS Checkout -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium font-headline text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span>
+<span>POS Checkout</span>
+</a>
+<!-- 4. Promotions -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium font-headline text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="local_offer">local_offer</span>
+<span>Promotions</span>
+</a>
+<!-- 5. Sales Ledger (ACTIVE: Primary Intent of Printable Receipt Preview) -->
+<a class="flex items-center gap-3 px-3 py-2 text-teal-700 bg-teal-50 rounded-lg font-bold border-l-4 border-teal-700 font-headline text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span>Sales Ledger</span>
+</a>
+<!-- 6. Reports -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium font-headline text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Reports</span>
+</a>
+<!-- 7. Staff -->
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium font-headline text-sm transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+<span>Staff</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Footer -->
+<div class="border-t border-slate-200 pt-3 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium font-headline text-sm transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+<span>Account Setup</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-medium font-headline text-sm transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<div class="mt-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+<span class="text-xs font-mono font-medium text-slate-700">KRA TIMS v2.4</span>
+</div>
+<span class="text-[10px] font-mono text-slate-600 font-semibold px-1.5 py-0.5 bg-slate-200 rounded">LIVE</span>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- 2. TOP NAVIGATION BAR (From Shared Components JSON)                       -->
+<!-- ========================================================================= -->
+<header class="flex justify-between items-center h-16 px-6 ml-64 border-b border-slate-200 bg-white sticky top-0 z-20">
+<!-- Left: Omnibar & Branch Context -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-xs font-mono bg-slate-100 text-slate-700 px-3 py-1.5 rounded border border-slate-200">
+<span class="material-symbols-outlined text-slate-600" data-icon="store">store</span>
+<span class="font-bold">Thika Branch · POS Terminal #01</span>
+</div>
+<!-- Quick Omnibar -->
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-600" data-icon="search">search</span>
+<input class="w-full text-xs font-body pl-9 pr-12 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-600 focus:bg-white text-slate-800 placeholder-slate-600" placeholder="Ctrl + K · Search receipt, customer, serial..." readonly="" type="text" value="#RCP-2026-041"/>
+<kbd class="absolute right-2.5 top-2 text-[10px] font-mono bg-white border border-slate-200 text-slate-600 px-1 rounded shadow-2xs">ESC</kbd>
+</div>
+<!-- Real-Time Node Badge -->
+<div class="hidden xl:flex items-center gap-2 text-xs font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+<span>Node Online · Gateway 14ms</span>
+</div>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-3">
+<!-- Shift info chip -->
+<div class="text-right hidden sm:block">
+<div class="text-xs font-mono font-semibold text-slate-800">Shift: Morning #04</div>
+<div class="text-[11px] font-mono text-slate-600">Till: 884210 (Kes.)</div>
+</div>
+<div class="h-6 w-px bg-slate-200 mx-1"></div>
+<!-- Trailing Action Buttons -->
+<button class="hover:text-slate-900 hover:bg-slate-100 rounded-md p-1.5 text-slate-500 transition-colors" title="Toggle Wireframe Noir / Daylight">
+<span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span>
+</button>
+<button class="hover:text-slate-900 hover:bg-slate-100 rounded-md p-1.5 text-slate-500 transition-colors relative" title="Notifications">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full"></span>
+</button>
+<button class="hover:text-slate-900 hover:bg-slate-100 rounded-md p-1.5 text-slate-500 transition-colors" title="Help Desk">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<button class="text-xs font-headline font-semibold text-slate-700 hover:bg-slate-100 border border-slate-200 px-2.5 py-1.5 rounded-lg transition-colors">
+        Hold Sale
+      </button>
+<div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-700 border border-slate-300">
+          NO
+        </div>
+<div class="flex flex-col text-left">
+<span class="text-xs font-bold text-slate-900 leading-none">ndungu</span>
+<span class="text-[10px] font-mono text-slate-600">Owner</span>
+</div>
+</div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- 3. MAIN WORKSPACE / SALES LEDGER VIEW (Blurred & Dimmed Backdrop)         -->
+<!-- ========================================================================= -->
+<main class="ml-64 flex-1 flex flex-col bg-[#F8FAFC] min-h-[calc(100vh-4rem)] relative overflow-hidden">
+<!-- Ledger Top Bar Filters -->
+<div class="p-6 pb-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 bg-white/70">
+<div>
+<div class="flex items-center gap-2 text-xs font-mono text-slate-600 mb-1">
+<span>SALES LEDGER</span>
+<span>/</span>
+<span>TODAY'S BATCH</span>
+<span>/</span>
+<span class="text-teal-700 font-bold">LIVE TRANSACTIONS</span>
+</div>
+<h1 class="text-xl font-headline font-extrabold text-slate-900 tracking-tight">Sales &amp; Receipt Journal</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-medium">
+<button class="px-3 py-1 bg-white shadow-xs rounded font-semibold text-slate-900">All (84)</button>
+<button class="px-3 py-1 text-slate-600 hover:text-slate-900">M-PESA (62)</button>
+<button class="px-3 py-1 text-slate-600 hover:text-slate-900">Cash (18)</button>
+<button class="px-3 py-1 text-slate-600 hover:text-slate-900">Card (4)</button>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg shadow-xs hover:bg-slate-50">
+<span class="material-symbols-outlined text-sm" data-icon="tune">tune</span>
+          Filter Ledger
+        </button>
+</div>
+</div>
+<!-- Background Table Representation -->
+<div class="p-6 flex-1">
+<div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+<table class="w-full text-left text-xs">
+<thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-mono">
+<tr>
+<th class="py-3 px-4">RECEIPT #</th>
+<th class="py-3 px-4">TIMESTAMP</th>
+<th class="py-3 px-4">CUSTOMER</th>
+<th class="py-3 px-4">ITEMS</th>
+<th class="py-3 px-4">METHOD &amp; REF</th>
+<th class="py-3 px-4 text-right">TOTAL (KES.)</th>
+<th class="py-3 px-4 text-center">STATUS</th>
+<th class="py-3 px-4 text-right">ACTIONS</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 font-headline">
+<!-- Row 1: Active highlighted row -->
+<tr class="bg-teal-50/60 ring-2 ring-teal-600/20 font-medium">
+<td class="py-3.5 px-4 font-mono font-bold text-teal-800 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-teal-600"></span>
+                #RCP-2026-041
+              </td>
+<td class="py-3.5 px-4 font-mono text-slate-600">14:32:08 EAT</td>
+<td class="py-3.5 px-4 text-slate-900 font-semibold">Walk-in Retail Customer</td>
+<td class="py-3.5 px-4 text-slate-600">Samsung 43" 4K Smart, Sony Headphones</td>
+<td class="py-3.5 px-4 font-mono text-slate-700">
+<span class="inline-block px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold mr-1">M-PESA</span>
+                SJK82910XY
+              </td>
+<td class="py-3.5 px-4 font-mono font-bold text-slate-900 text-right">48,024.00</td>
+<td class="py-3.5 px-4 text-center">
+<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-mono text-[11px] font-bold">VERIFIED</span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<span class="text-teal-700 font-semibold cursor-pointer underline text-xs">Viewing</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 text-slate-700">
+<td class="py-3.5 px-4 font-mono text-slate-800">#RCP-2026-040</td>
+<td class="py-3.5 px-4 font-mono text-slate-500">14:18:41 EAT</td>
+<td class="py-3.5 px-4 text-slate-900 font-medium">Grace Wambui</td>
+<td class="py-3.5 px-4 text-slate-600">TP-Link Archer AX12 Router (2x)</td>
+<td class="py-3.5 px-4 font-mono text-slate-600">
+<span class="inline-block px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold mr-1">M-PESA</span>
+                SJK82904QR
+              </td>
+<td class="py-3.5 px-4 font-mono text-slate-900 text-right">11,200.00</td>
+<td class="py-3.5 px-4 text-center">
+<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-mono text-[11px] font-semibold">VERIFIED</span>
+</td>
+<td class="py-3.5 px-4 text-right text-slate-400">
+<span class="material-symbols-outlined text-sm hover:text-slate-700 cursor-pointer" data-icon="receipt">receipt</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50 text-slate-700">
+<td class="py-3.5 px-4 font-mono text-slate-800">#RCP-2026-039</td>
+<td class="py-3.5 px-4 font-mono text-slate-500">13:54:19 EAT</td>
+<td class="py-3.5 px-4 text-slate-900 font-medium">Kariuki Boda Logistics</td>
+<td class="py-3.5 px-4 text-slate-600">Anker PowerCore 20k, Type-C Cables (x4)</td>
+<td class="py-3.5 px-4 font-mono text-slate-600">
+<span class="inline-block px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold mr-1">CASH</span>
+                TILL-DRAWER
+              </td>
+<td class="py-3.5 px-4 font-mono text-slate-900 text-right">7,850.00</td>
+<td class="py-3.5 px-4 text-center">
+<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-mono text-[11px] font-semibold">VERIFIED</span>
+</td>
+<td class="py-3.5 px-4 text-right text-slate-400">
+<span class="material-symbols-outlined text-sm hover:text-slate-700 cursor-pointer" data-icon="receipt">receipt</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50 text-slate-700">
+<td class="py-3.5 px-4 font-mono text-slate-800">#RCP-2026-038</td>
+<td class="py-3.5 px-4 font-mono text-slate-500">13:42:01 EAT</td>
+<td class="py-3.5 px-4 text-slate-900 font-medium">Dr. M. Mutua</td>
+<td class="py-3.5 px-4 text-slate-600">SanDisk 1TB Extreme Portable SSD</td>
+<td class="py-3.5 px-4 font-mono text-slate-600">
+<span class="inline-block px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 text-[10px] font-bold mr-1">CARD</span>
+                AUTH-77382
+              </td>
+<td class="py-3.5 px-4 font-mono text-slate-900 text-right">18,500.00</td>
+<td class="py-3.5 px-4 text-center">
+<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-mono text-[11px] font-semibold">VERIFIED</span>
+</td>
+<td class="py-3.5 px-4 text-right text-slate-400">
+<span class="material-symbols-outlined text-sm hover:text-slate-700 cursor-pointer" data-icon="receipt">receipt</span>
+</td>
+</tr>
+<!-- Row 5: Low Stock Warning / Special Alert item sold earlier -->
+<tr class="hover:bg-slate-50 text-slate-700">
+<td class="py-3.5 px-4 font-mono text-slate-800">#RCP-2026-037</td>
+<td class="py-3.5 px-4 font-mono text-slate-500">13:15:30 EAT</td>
+<td class="py-3.5 px-4 text-slate-900 font-medium">Thika Technical Student</td>
+<td class="py-3.5 px-4 text-slate-600">HDMI 2.1 3m Gold Cable, OTG Adapter</td>
+<td class="py-3.5 px-4 font-mono text-slate-600">
+<span class="inline-block px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold mr-1">M-PESA</span>
+                SJK82881AA
+              </td>
+<td class="py-3.5 px-4 font-mono text-slate-900 text-right">2,100.00</td>
+<td class="py-3.5 px-4 text-center">
+<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-mono text-[11px] font-semibold">VERIFIED</span>
+</td>
+<td class="py-3.5 px-4 text-right text-slate-400">
+<span class="material-symbols-outlined text-sm hover:text-slate-700 cursor-pointer" data-icon="receipt">receipt</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Soft Ambient Dim Backdrop Overlay (Focus on slide-over drawer) -->
+<div class="absolute inset-0 bg-slate-900/15 backdrop-blur-[1px] pointer-events-none z-40 transition-opacity"></div>
+<!-- ========================================================================= -->
+<!-- 4. SLIDE-OVER RECEIPT PREVIEW DRAWER (Docked Right, Width = 460px)         -->
+<!-- ========================================================================= -->
+<section class="fixed right-0 top-0 w-[460px] h-screen bg-slate-50 border-l border-slate-200 shadow-2xl z-50 flex flex-col animate-[fadeIn_0.2s_ease-out]">
+<!-- Drawer Header Bar -->
+<div class="p-4 bg-white border-b border-slate-200 shrink-0">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<h2 class="font-headline font-bold text-slate-900 text-base leading-none">Receipt Preview</h2>
+<span class="font-mono text-xs font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">#RCP-2026-041</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 font-mono text-[10px] font-bold tracking-tight text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              COMPLETED · VERIFIED
+            </span>
+<button class="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1 rounded-md transition-colors leading-none" title="Close Drawer">
+<span class="material-symbols-outlined text-lg" data-icon="close">close</span>
+</button>
+</div>
+</div>
+<!-- Motion Spec Badge (Design System & Prompt requirement) -->
+<div class="flex items-center justify-between mb-3">
+<span class="font-mono text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+            220ms cubic-bezier(0.16, 1, 0.3, 1) slide-over
+          </span>
+<span class="font-mono text-[10px] text-slate-400">Terminal: #01</span>
+</div>
+<!-- Format Switcher Tabs: 80mm Thermal vs A4 Invoice -->
+<div class="flex items-center justify-between border-b border-slate-200 pt-1">
+<div class="flex gap-6">
+<button class="pb-2 text-xs font-headline font-bold text-teal-700 border-b-2 border-teal-700 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base" data-icon="receipt">receipt</span>
+              80mm Thermal
+            </button>
+<button class="pb-2 text-xs font-headline font-medium text-slate-400 hover:text-slate-700 flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-base" data-icon="description">description</span>
+              A4 Invoice
+            </button>
+</div>
+<!-- State Switcher Pills -->
+<div class="flex items-center gap-1 mb-2 bg-slate-100 p-0.5 rounded border border-slate-200 text-[10px] font-mono">
+<span class="px-1.5 py-0.5 bg-white text-slate-800 font-bold rounded shadow-2xs">Default</span>
+<span class="px-1.5 py-0.5 text-slate-400 hover:text-slate-600 cursor-pointer">Skeleton</span>
+<span class="px-1.5 py-0.5 text-slate-400 hover:text-slate-600 cursor-pointer">Voided</span>
+</div>
+</div>
+</div>
+<!-- Scrollable Receipt Paper Canvas Container -->
+<div class="flex-1 overflow-y-auto p-4 bg-slate-100/80 flex justify-center no-scrollbar">
+<!-- ========================================================================= -->
+<!-- 80mm THERMAL RECEIPT CANVAS                                               -->
+<!-- Width: ~320px to mimic exact 80mm thermal receipt scale                     -->
+<!-- ========================================================================= -->
+<div class="w-full max-w-[340px] bg-white rounded-sm shadow-md border border-slate-200 relative my-auto font-mono text-[11px] leading-relaxed text-slate-900 selection:bg-teal-100">
+<!-- Top Serrated Cut Simulation -->
+<div class="h-2 w-full border-b border-dashed border-slate-300 bg-slate-50 flex items-center justify-center">
+<span class="text-[8px] tracking-widest text-slate-400 uppercase font-mono">✂ TEAR HERE · 80MM ROLL</span>
+</div>
+<div class="p-4 sm:p-5">
+<!-- Receipt Header -->
+<div class="text-center pb-3 border-b border-dashed border-slate-300">
+<div class="font-headline font-black text-sm tracking-tight text-slate-950 uppercase mb-0.5">
+                NDUNGU ELECTRONICS
+              </div>
+<div class="text-[10px] text-slate-600 font-medium">Thika Main Branch · IMS Terminal #01</div>
+<div class="text-[10px] text-slate-600">Commercial St., Opp. Thika Arcade</div>
+<div class="text-[10px] text-slate-700 font-semibold mt-1">KRA PIN: P051283921X · TIMS Synced</div>
+<div class="text-[10px] text-slate-500 font-mono mt-0.5">Date: 2026-04-18 14:32 EAT</div>
+</div>
+<!-- Transaction Meta -->
+<div class="py-2.5 border-b border-dashed border-slate-300 text-[10px] flex flex-col gap-1 text-slate-600">
+<div class="flex justify-between">
+<span>RECEIPT:</span>
+<span class="font-bold text-slate-900">#RCP-2026-041</span>
+</div>
+<div class="flex justify-between">
+<span>CASHIER:</span>
+<span class="font-medium text-slate-800">kamau (Shift #04)</span>
+</div>
+<div class="flex justify-between">
+<span>CUSTOMER:</span>
+<span class="text-slate-800">Walk-in Cash / Retail</span>
+</div>
+<div class="flex justify-between font-semibold text-slate-800">
+<span>PAYMENT:</span>
+<span class="text-emerald-700 font-bold">M-PESA · SJK82910XY</span>
+</div>
+<div class="flex justify-between">
+<span>TILL NO:</span>
+<span class="font-mono text-slate-900">884210</span>
+</div>
+</div>
+<!-- Itemized Lines Header -->
+<div class="pt-2.5 pb-1 flex justify-between text-[10px] font-bold text-slate-900 uppercase border-b border-slate-200">
+<span>DESCRIPTION</span>
+<span class="text-right">TOTAL</span>
+</div>
+<!-- Item 1: Samsung TV with Promo & Serial -->
+<div class="py-2 border-b border-slate-100 flex flex-col gap-0.5">
+<div class="flex justify-between items-start font-semibold text-slate-950">
+<span class="pr-2 leading-tight">Samsung 43" Smart TV</span>
+<span class="tabular-nums font-mono whitespace-nowrap">Kes. 38,500.00</span>
+</div>
+<div class="text-[9.5px] text-slate-500 font-mono pl-1">
+                SN: SN-UA43-0019
+              </div>
+<div class="flex justify-between text-[9.5px] text-slate-600 pl-1">
+<span>Qty: 1 @ Kes. 42,000.00</span>
+</div>
+<!-- Promotional Tag -->
+<div class="flex justify-between text-[9.5px] text-emerald-700 font-medium pl-1 bg-emerald-50/80 px-1 py-0.5 rounded">
+<span>Promo (-10% Easter Splash)</span>
+<span class="tabular-nums">-Kes. 3,850.00</span>
+</div>
+</div>
+<!-- Item 2: Sony Headphones -->
+<div class="py-2 border-b border-dashed border-slate-300 flex flex-col gap-0.5">
+<div class="flex justify-between items-start font-semibold text-slate-950">
+<span class="pr-2 leading-tight">Sony WH-CH520 Wireless Headphones</span>
+<span class="tabular-nums font-mono whitespace-nowrap">Kes. 6,750.00</span>
+</div>
+<div class="flex justify-between text-[9.5px] text-slate-600 pl-1">
+<span>Qty: 1 @ Kes. 6,750.00</span>
+<span class="tabular-nums text-slate-500">Kes. 6,750.00</span>
+</div>
+</div>
+<!-- Financial Breakdown (Tabular mono numbers) -->
+<div class="py-2.5 flex flex-col gap-1 text-[10.5px] border-b border-dashed border-slate-300">
+<div class="flex justify-between text-slate-600">
+<span>Subtotal (Gross):</span>
+<span class="tabular-nums font-mono">Kes. 45,250.00</span>
+</div>
+<div class="flex justify-between text-emerald-700 font-medium">
+<span>Promo Discount:</span>
+<span class="tabular-nums font-mono">-Kes. 3,850.00</span>
+</div>
+<div class="flex justify-between text-slate-700 font-semibold">
+<span>Post-Discount Subtotal:</span>
+<span class="tabular-nums font-mono">Kes. 41,400.00</span>
+</div>
+<div class="flex justify-between text-slate-600 text-[10px]">
+<span>+16% VAT (KRA TIMS Inc):</span>
+<span class="tabular-nums font-mono">Kes. 6,624.00</span>
+</div>
+<!-- Grand Total (Prominent) -->
+<div class="flex justify-between items-baseline pt-2 mt-1 border-t border-slate-300">
+<span class="font-headline font-extrabold text-xs uppercase tracking-tight text-slate-950">GRAND TOTAL:</span>
+<span class="font-mono font-bold text-base text-slate-950 tabular-nums">Kes. 48,024.00</span>
+</div>
+</div>
+<!-- Tender & Change -->
+<div class="py-2 border-b border-dashed border-slate-300 text-[10px] flex flex-col gap-0.5 text-slate-700">
+<div class="flex justify-between">
+<span>Paid via M-PESA:</span>
+<span class="font-mono font-semibold tabular-nums text-slate-900">Kes. 48,024.00</span>
+</div>
+<div class="flex justify-between">
+<span>Change:</span>
+<span class="font-mono tabular-nums text-slate-600">Kes. 0.00</span>
+</div>
+</div>
+<!-- QR Code & KRA eTIMS Fiscal Verification Section -->
+<div class="pt-3 pb-2 flex flex-col items-center justify-center text-center">
+<div class="text-[9px] font-bold text-slate-800 tracking-wider mb-1">
+                KRA eTIMS FISCAL INVOICE QR
+              </div>
+<!-- Realistic CSS Simulated QR Code Matrix -->
+<div class="w-24 h-24 p-1.5 bg-white border border-slate-800 rounded flex flex-wrap gap-0.5 justify-center items-center relative shadow-2xs">
+<!-- QR Corner Markers -->
+<div class="w-5 h-5 border-2 border-slate-950 flex items-center justify-center absolute top-1 left-1">
+<div class="w-2.5 h-2.5 bg-slate-950"></div>
+</div>
+<div class="w-5 h-5 border-2 border-slate-950 flex items-center justify-center absolute top-1 right-1">
+<div class="w-2.5 h-2.5 bg-slate-950"></div>
+</div>
+<div class="w-5 h-5 border-2 border-slate-950 flex items-center justify-center absolute bottom-1 left-1">
+<div class="w-2.5 h-2.5 bg-slate-950"></div>
+</div>
+<!-- Simulated interior QR noise -->
+<div class="grid grid-cols-6 gap-0.5 w-12 h-12">
+<span class="bg-slate-900"></span><span class="bg-white"></span><span class="bg-slate-900"></span><span class="bg-slate-900"></span><span class="bg-white"></span><span class="bg-slate-900"></span>
+<span class="bg-white"></span><span class="bg-slate-900"></span><span class="bg-white"></span><span class="bg-slate-900"></span><span class="bg-slate-900"></span><span class="bg-white"></span>
+<span class="bg-slate-900"></span><span class="bg-slate-900"></span><span class="bg-white"></span><span class="bg-white"></span><span class="bg-slate-900"></span><span class="bg-slate-900"></span>
+<span class="bg-slate-900"></span><span class="bg-white"></span><span class="bg-slate-900"></span><span class="bg-slate-900"></span><span class="bg-white"></span><span class="bg-slate-900"></span>
+<span class="bg-white"></span><span class="bg-slate-900"></span><span class="bg-slate-900"></span><span class="bg-white"></span><span class="bg-slate-900"></span><span class="bg-white"></span>
+<span class="bg-slate-900"></span><span class="bg-white"></span><span class="bg-white"></span><span class="bg-slate-900"></span><span class="bg-slate-900"></span><span class="bg-slate-900"></span>
+</div>
+</div>
+<div class="text-[8.5px] font-mono text-slate-500 mt-1">
+                KRA SIGN: 9E74-F81A-B441-2026-ETIMS
+              </div>
+</div>
+<!-- Barcode Representation -->
+<div class="pt-2 pb-2 text-center border-t border-dotted border-slate-300">
+<div class="flex items-center justify-center gap-[2px] h-8 overflow-hidden px-4">
+<span class="barcode-line w-1"></span>
+<span class="barcode-line w-0.5"></span>
+<span class="barcode-line w-1.5"></span>
+<span class="barcode-line w-0.5"></span>
+<span class="barcode-line w-2"></span>
+<span class="barcode-line w-1"></span>
+<span class="barcode-line w-0.5"></span>
+<span class="barcode-line w-1"></span>
+<span class="barcode-line w-2"></span>
+<span class="barcode-line w-0.5"></span>
+<span class="barcode-line w-1.5"></span>
+<span class="barcode-line w-1"></span>
+<span class="barcode-line w-0.5"></span>
+<span class="barcode-line w-2"></span>
+<span class="barcode-line w-1"></span>
+<span class="barcode-line w-0.5"></span>
+<span class="barcode-line w-1.5"></span>
+<span class="barcode-line w-2"></span>
+<span class="barcode-line w-0.5"></span>
+<span class="barcode-line w-1"></span>
+<span class="barcode-line w-0.5"></span>
+<span class="barcode-line w-2"></span>
+</div>
+<div class="text-[9px] font-mono text-slate-600 mt-0.5 tracking-widest">
+                *RCP-2026-041*
+              </div>
+</div>
+<!-- Friendly Note & Warranty Terms -->
+<div class="pt-2 border-t border-dashed border-slate-300 text-center text-[9px] text-slate-600 space-y-1">
+<div class="font-semibold text-slate-900">Thank you for shopping at Ndungu Electronics!</div>
+<div class="text-slate-500">Goods once sold cannot be returned without receipt.</div>
+<div class="text-teal-800 font-bold bg-teal-50 py-1 px-2 rounded border border-teal-100">
+                Warranty: 24 Months on TVs with serial match.
+              </div>
+</div>
+</div>
+<!-- Bottom Serrated Cut Simulation -->
+<div class="h-2.5 w-full border-t border-dashed border-slate-300 bg-slate-50"></div>
+</div>
+</div>
+<!-- Drawer Bottom Action Footer (Print & PDF Export) -->
+<div class="p-4 bg-white border-t border-slate-200 shrink-0 flex flex-col gap-2.5">
+<div class="flex items-center gap-2">
+<!-- Primary Print CTA: Deep Emerald Teal #0F766E -->
+<button class="flex-1 bg-[#0F766E] hover:bg-[#115E59] active:scale-[0.99] text-white font-headline font-bold text-xs py-3 px-4 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base" data-icon="print">print</span>
+<span>Print Receipt (ESC + P)</span>
+</button>
+<!-- Secondary PDF Outline Button -->
+<button class="bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-headline font-semibold text-xs py-3 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-2xs">
+<span class="material-symbols-outlined text-base text-slate-600" data-icon="download">download</span>
+<span>PDF (ReportLab)</span>
+</button>
+</div>
+<!-- Secondary Quick Actions Row -->
+<div class="flex items-center justify-between text-[11px] font-mono text-slate-500 pt-1 px-1">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-emerald-600" data-icon="check_circle">check_circle</span>
+<span>Auto-cutter enabled</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="hover:text-teal-700 underline font-medium">Reprint #041</button>
+<button class="hover:text-teal-700 underline font-medium">Email to Customer</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Interactive Hotkey & Switcher Script -->
+<script>
+    document.addEventListener('keydown', (e) => {
+      // ESC closes drawer preview
+      if (e.key === 'Escape') {
+        const drawer = document.querySelector('section');
+        if (drawer) {
+          drawer.classList.toggle('hidden');
+        }
+      }
+      // P hotkey triggers print simulation
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        window.print();
+      }
+    });
+  </script>
+</body></html>
