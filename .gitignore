@@ -26,4 +26,6 @@ env/
 .coverage
 htmlcov/
 .DS_Store
-Thumbs.db
+# External tools
+tools/
+
