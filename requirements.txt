@@ -1,0 +1,4 @@
+# Ndungu Electronics IMS - Production Dependencies (PythonAnywhere Free Tier Safe < 512 MiB)
+Flask>=3.0.0
+python-dotenv>=1.0.0
+reportlab>=4.1.0

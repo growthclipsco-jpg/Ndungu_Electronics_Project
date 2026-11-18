@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Owner setup{% endblock %}
+{% block content %}
+<section class="card auth-card">
+  <h1 class="auth-title">Create the owner account</h1>
+  <p class="muted center">This one-time setup creates the shop owner (administrator) account.</p>
+  <form method="post" class="form" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="field-row">
+      <span class="pill-label">Username</span>
+      <input type="text" name="username" value="{{ username }}" required maxlength="30" autofocus>
+    </label>
+    <label class="field-row">
+      <span class="pill-label">Password</span>
+      <input type="password" name="password" required minlength="6">
+    </label>
+    <label class="field-row">
+      <span class="pill-label">Confirm</span>
+      <input type="password" name="confirm" required minlength="6">
+    </label>
+    <button type="submit" class="btn btn-primary btn-block">Create account</button>
+  </form>
+  <p class="muted center"><a href="{{ url_for('main.login') }}">Back to sign in</a></p>
+</section>
+{% endblock %}

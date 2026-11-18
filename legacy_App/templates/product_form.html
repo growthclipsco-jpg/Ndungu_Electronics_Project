@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Add product' if mode == 'add' else 'Edit product' }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ 'Add new product' if mode == 'add' else 'Edit product' }}</h1>
+  <a class="btn btn-ghost" href="{{ url_for('main.inventory') }}">← Back to inventory</a>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <form method="post" class="form" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Product name *
+        <input type="text" name="name" value="{{ product.name or '' }}" required maxlength="100" placeholder='e.g. Samsung 43" Smart TV'>
+      </label>
+      <div class="row">
+        <label>Brand *
+          <input type="text" name="brand" value="{{ product.brand or '' }}" required maxlength="50" placeholder="e.g. Samsung">
+        </label>
+        <label>Model
+          <input type="text" name="model" value="{{ product.model or '' }}" maxlength="50" placeholder="e.g. UA43T5300">
+        </label>
+      </div>
+      <div class="row">
+        <label>Category *
+          <select name="category" required>
+            <option value="">Choose…</option>
+            {% for c in CATEGORIES %}<option value="{{ c }}" {{ 'selected' if c == product.category else '' }}>{{ c }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Serial number *
+          <input type="text" name="serial_no" value="{{ product.serial_no or '' }}" required maxlength="40" class="mono" placeholder="e.g. UA43-8842">
+        </label>
+      </div>
+      <div class="row">
+        <label>Price (Kes) *
+          <input type="number" name="price" value="{{ product.price|num if product.price is defined else '' }}" min="0" step="0.01" required>
+        </label>
+        <label>Stock (units) *
+          <input type="number" name="stock" value="{{ product.stock|num if product.stock is defined else '' }}" min="0" step="1" required>
+        </label>
+      </div>
+      <p class="muted">Each serial number can only be recorded once. Duplicates are rejected automatically.</p>
+      <button class="btn btn-primary" type="submit">{{ 'Save product' if mode == 'add' else 'Save changes' }}</button>
+    </form>
+  </section>
+
+  {% if mode == 'edit' and product.product_id %}
+  <section class="card">
+    <h2>Restock</h2>
+    <p class="muted">Record new stock delivered for this product.</p>
+    <form method="post" action="{{ url_for('main.restock_product', product_id=product.product_id) }}" class="form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Units received
+        <input type="number" name="quantity" min="1" max="10000" step="1" value="1" required>
+      </label>
+      <button class="btn" type="submit">Add to stock</button>
+    </form>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

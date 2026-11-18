@@ -1,0 +1,29 @@
+# Secrets & environment variables
+.env
+.env.*
+!.env.example
+
+# SQLite databases & instance secrets
+instance/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Logs & backups
+logs/
+backups/
+
+# Python / Pytest / Selenium / IDE artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+.coverage
+htmlcov/
+.DS_Store
+Thumbs.db

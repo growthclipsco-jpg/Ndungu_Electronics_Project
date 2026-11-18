@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}BI Reports &amp; Reorder Center · Ndungu Electronics IMS{% endblock %}
+
+{% block extra_head %}
+<style>
+  .font-mono-numbers {
+    font-family: 'IBM Plex Mono', monospace;
+    font-feature-settings: 'tnum' on, 'zero' on;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+  <!-- Header Banner & Action Bar -->
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">BI Reports &amp; Reorder Center</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        Executive sales telemetry, gross profit margins, inventory valuation, and automated reorder recommendations.
+      </p>
+    </div>
+
+    <!-- Export Action Buttons -->
+    <div class="flex items-center gap-2">
+      <a href="{{ url_for('reports.export_csv', period=period) }}"
+         class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1.5 shadow-2xs">
+        <span class="material-symbols-outlined text-base text-emerald-600">table_view</span>
+        <span>Export CSV</span>
+      </a>
+
+      <a href="{{ url_for('reports.export_pdf', period=period) }}"
+         class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-base">picture_as_pdf</span>
+        <span>Download PDF (A4)</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Period Filter Selector -->
+  <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs select-none">
+    <span class="text-slate-400 font-semibold uppercase text-[10px] tracking-wider pr-2">Period:</span>
+    <a href="{{ url_for('reports.index', period='today') }}" class="px-3 py-1.5 rounded-full font-semibold transition-colors {% if period == 'today' %}bg-teal-700 text-white shadow-2xs{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100{% endif %}">
+      Today
+    </a>
+    <a href="{{ url_for('reports.index', period='yesterday') }}" class="px-3 py-1.5 rounded-full font-semibold transition-colors {% if period == 'yesterday' %}bg-teal-700 text-white shadow-2xs{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100{% endif %}">
+      Yesterday
+    </a>
+    <a href="{{ url_for('reports.index', period='7days') }}" class="px-3 py-1.5 rounded-full font-semibold transition-colors {% if period == '7days' %}bg-teal-700 text-white shadow-2xs{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100{% endif %}">
+      Last 7 Days
+    </a>
+    <a href="{{ url_for('reports.index', period='month') }}" class="px-3 py-1.5 rounded-full font-semibold transition-colors {% if period == 'month' %}bg-teal-700 text-white shadow-2xs{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100{% endif %}">
+      This Month
+    </a>
+    <a href="{{ url_for('reports.index', period='all_time') }}" class="px-3 py-1.5 rounded-full font-semibold transition-colors {% if period == 'all_time' %}bg-teal-700 text-white shadow-2xs{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100{% endif %}">
+      All Time
+    </a>
+  </div>
+
+  <!-- Financial Telemetry Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs font-semibold">Net Sales Revenue</span>
+        <span class="material-symbols-outlined text-lg text-emerald-600">attach_money</span>
+      </div>
+      <div class="text-lg sm:text-xl font-extrabold font-mono-numbers text-slate-900 dark:text-white">
+        {{ format_kes(kpi.net_revenue_cents) }}
+      </div>
+      <p class="text-[10px] text-slate-400 mt-0.5">Post-discount, tax-inclusive</p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs font-semibold">Gross Profit &amp; Margin</span>
+        <span class="material-symbols-outlined text-lg text-teal-700">trending_up</span>
+      </div>
+      <div class="text-lg sm:text-xl font-extrabold font-mono-numbers text-teal-800 dark:text-teal-400">
+        {{ format_kes(kpi.gross_profit_cents) }}
+      </div>
+      <p class="text-[10px] text-slate-400 mt-0.5">Estimated margin: <strong>{{ kpi.margin_pct }}%</strong></p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs font-semibold">Transactions &amp; Basket</span>
+        <span class="material-symbols-outlined text-lg text-purple-600">shopping_bag</span>
+      </div>
+      <div class="text-lg sm:text-xl font-extrabold font-mono-numbers text-slate-900 dark:text-white">
+        {{ kpi.sales_count }} sales
+      </div>
+      <p class="text-[10px] text-slate-400 mt-0.5">Avg basket: <strong>{{ format_kes(kpi.avg_basket_cents) }}</strong></p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs font-semibold">VAT Collected (16%)</span>
+        <span class="material-symbols-outlined text-lg text-blue-600">account_balance</span>
+      </div>
+      <div class="text-lg sm:text-xl font-extrabold font-mono-numbers text-slate-900 dark:text-white">
+        {{ format_kes(kpi.tax_cents) }}
+      </div>
+      <p class="text-[10px] text-slate-400 mt-0.5">KRA statutory liability</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left 2 Cols: Low-Stock Surveillance & Reorder Table -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-500">warning</span>
+            <h2 class="text-sm font-bold text-slate-900 dark:text-white">Low-Stock Surveillance &amp; Reorder Center</h2>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+            {{ low_stock_items|length }} Alerts
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-mono uppercase text-slate-400">
+              <tr>
+                <th class="px-4 py-3">Product Title &amp; SKU</th>
+                <th class="px-4 py-3 text-center">Stock</th>
+                <th class="px-4 py-3 text-center">Threshold</th>
+                <th class="px-4 py-3 text-center">Order Qty</th>
+                <th class="px-4 py-3">Supplier Contact</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              {% for it in low_stock_items %}
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                <td class="px-4 py-3">
+                  <a href="{{ url_for('inventory.product_detail', product_id=it.product_id) }}" class="font-bold text-slate-900 dark:text-white hover:text-teal-700 transition-colors block">
+                    {{ it.name }}
+                  </a>
+                  <span class="text-[10px] font-mono text-slate-400">{{ it.sku }} • {{ it.category_name }}</span>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  {% if it.stock <= 0 %}
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300">Out of Stock</span>
+                  {% else %}
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">{{ it.stock }} units</span>
+                  {% endif %}
+                </td>
+                <td class="px-4 py-3 text-center font-mono text-slate-500">
+                  {{ it.reorder_threshold }}
+                </td>
+                <td class="px-4 py-3 text-center font-mono font-bold text-teal-700 dark:text-teal-400">
+                  +{{ it.reorder_qty }}
+                </td>
+                <td class="px-4 py-3 text-[11px] text-slate-600 dark:text-slate-400 font-mono">
+                  {% if it.supplier_name or it.supplier_phone %}
+                    {{ it.supplier_name }} <span class="text-slate-400">({{ it.supplier_phone }})</span>
+                  {% else %}
+                    <span class="text-slate-400">-</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="py-8 text-center text-slate-400">
+                  <span class="material-symbols-outlined text-3xl mb-1 text-emerald-500">check_circle</span>
+                  <p class="text-xs font-semibold">All inventory stock levels are healthy.</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right 1 Col: Top Products & Payment Breakdown -->
+    <div class="space-y-6">
+
+      <!-- Top Selling SKUs -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-teal-700 text-base">leaderboard</span>
+          <span>Top Revenue Generators</span>
+        </h3>
+
+        <div class="space-y-2">
+          {% for tp in top_products %}
+          <div class="p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between text-xs">
+            <div class="min-w-0 pr-2">
+              <h4 class="font-bold text-slate-800 dark:text-slate-200 truncate">{{ tp.product_name_snapshot }}</h4>
+              <span class="text-[10px] font-mono text-slate-400">{{ tp.sku_snapshot }} • {{ tp.units_sold }} units</span>
+            </div>
+            <span class="font-mono font-bold text-slate-900 dark:text-white shrink-0">
+              {{ format_kes(tp.revenue_cents) }}
+            </span>
+          </div>
+          {% else %}
+          <p class="text-xs text-slate-400 py-4 text-center">No sales registered in this period.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Payment Tender Breakdown -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-teal-700 text-base">pie_chart</span>
+          <span>Payment Tender Split</span>
+        </h3>
+
+        <div class="space-y-2">
+          {% for pm in payment_stats %}
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold uppercase text-slate-700 dark:text-slate-300">{{ pm.payment_method }}</span>
+            <div class="text-right">
+              <span class="font-mono font-bold text-slate-900 dark:text-white block">{{ format_kes(pm.total_cents) }}</span>
+              <span class="text-[10px] text-slate-400">{{ pm.cnt }} txns</span>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-xs text-slate-400 py-3 text-center">No payment data recorded.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Inventory Valuation Banner -->
+      <div class="bg-teal-900 text-white rounded-2xl p-5 shadow-xs">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-teal-300 block mb-1">Catalog Valuation</span>
+        <div class="text-xl font-extrabold font-mono-numbers">
+          {{ format_kes(valuation_cents) }}
+        </div>
+        <p class="text-[11px] text-teal-200 mt-1">Across {{ total_skus }} active catalog items.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

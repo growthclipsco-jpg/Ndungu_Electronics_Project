@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Sales log{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Sales log</h1>
+  {% if g.user.role == 'owner' %}<a class="btn btn-primary" href="{{ url_for('main.reports') }}">Summary report</a>{% endif %}
+</div>
+
+<form class="toolbar" method="get" action="{{ url_for('main.sales_log') }}">
+  <label>From <input type="date" name="from" value="{{ date_from }}"></label>
+  <label>To <input type="date" name="to" value="{{ date_to }}"></label>
+  <button class="btn" type="submit">Filter</button>
+  {% if date_from or date_to %}<a class="btn btn-ghost" href="{{ url_for('main.sales_log') }}">Clear</a>{% endif %}
+</form>
+
+<section class="stats">
+  <div class="stat"><span>Transactions</span><strong>{{ totals.transactions }}</strong></div>
+  <div class="stat"><span>Units sold</span><strong>{{ totals.units }}</strong></div>
+  <div class="stat"><span>Total value</span><strong>{{ totals.revenue|kes }}</strong></div>
+</section>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Time</th><th>Product</th><th>Serial No</th><th class="num">Quantity</th><th class="num">Value</th><th>Sold by</th></tr></thead>
+    <tbody>
+      {% for s in sales %}
+        <tr>
+          <td>{{ s.sale_date|dt }}</td>
+          <td>{{ s.product_name }}{% if not s.product_id %} <small class="muted">(removed)</small>{% endif %}</td>
+          <td class="mono">{{ s.serial_no }}</td>
+          <td class="num">{{ s.quantity }}</td>
+          <td class="num">{{ s.total_price|kes }}</td>
+          <td>{{ s.username or '—' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="empty">No sales recorded{% if date_from or date_to %} for the selected dates{% endif %}.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

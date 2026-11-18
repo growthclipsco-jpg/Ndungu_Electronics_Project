@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Ledger &amp; Void Management · Ndungu Electronics IMS{% endblock %}
+
+{% block extra_head %}
+<style>
+  .font-mono-numbers {
+    font-family: 'IBM Plex Mono', monospace;
+    font-feature-settings: 'tnum' on, 'zero' on;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+  <!-- Header Banner -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Sales Ledger &amp; Void Management</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        Audited transaction records with atomic inventory restitution for authorized void reversals.
+      </p>
+    </div>
+
+    <a href="{{ url_for('pos.register') }}" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 transition-colors">
+      <span class="material-symbols-outlined text-base">point_of_sale</span>
+      <span>New Counter Sale</span>
+    </a>
+  </div>
+
+  <!-- Telemetry KPI Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs font-semibold">Total Revenue (Net)</span>
+        <span class="material-symbols-outlined text-lg text-emerald-600">payments</span>
+      </div>
+      <div class="text-lg sm:text-xl font-extrabold font-mono-numbers text-slate-900 dark:text-white">
+        {{ format_kes(kpi.completed_revenue_cents) }}
+      </div>
+      <p class="text-[10px] text-slate-400 mt-0.5">Excludes voided reversals</p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs font-semibold">Completed Sales</span>
+        <span class="material-symbols-outlined text-lg text-teal-700">task_alt</span>
+      </div>
+      <div class="text-lg sm:text-xl font-extrabold font-mono-numbers text-slate-900 dark:text-white">
+        {{ kpi.completed_count }}
+      </div>
+      <p class="text-[10px] text-slate-400 mt-0.5">Finalized transactions</p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs font-semibold">Voided Sales</span>
+        <span class="material-symbols-outlined text-lg text-rose-500">undo</span>
+      </div>
+      <div class="text-lg sm:text-xl font-extrabold font-mono-numbers text-slate-900 dark:text-white">
+        {{ kpi.voided_count }}
+      </div>
+      <p class="text-[10px] text-slate-400 mt-0.5">Stock restituted</p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs font-semibold">Active Cashiers</span>
+        <span class="material-symbols-outlined text-lg text-purple-600">badge</span>
+      </div>
+      <div class="text-lg sm:text-xl font-extrabold font-mono-numbers text-slate-900 dark:text-white">
+        {{ kpi.cashier_count }}
+      </div>
+      <p class="text-[10px] text-slate-400 mt-0.5">Attendants on record</p>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+    <form method="GET" action="{{ url_for('sales.index') }}" class="flex flex-col md:flex-row items-center gap-3">
+      <!-- Search Term -->
+      <div class="relative flex-1 w-full">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+        <input type="text" name="q" value="{{ search }}" placeholder="Search receipt number, cashier, M-Pesa ref..."
+               class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-teal-700">
+      </div>
+
+      <!-- Status Filter -->
+      <div class="w-full md:w-36">
+        <select name="status" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+          <option value="">All Statuses</option>
+          <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+          <option value="voided" {% if status_filter == 'voided' %}selected{% endif %}>Voided</option>
+        </select>
+      </div>
+
+      <!-- Payment Method Filter -->
+      <div class="w-full md:w-36">
+        <select name="payment" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+          <option value="">All Payments</option>
+          <option value="cash" {% if payment_filter == 'cash' %}selected{% endif %}>Cash</option>
+          <option value="mpesa" {% if payment_filter == 'mpesa' %}selected{% endif %}>M-Pesa</option>
+          <option value="card" {% if payment_filter == 'card' %}selected{% endif %}>Card</option>
+        </select>
+      </div>
+
+      <!-- Date Range Inputs -->
+      <div class="flex items-center gap-1.5 w-full md:w-auto">
+        <input type="date" name="start_date" value="{{ start_date }}" class="px-2.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white">
+        <span class="text-xs text-slate-400">to</span>
+        <input type="date" name="end_date" value="{{ end_date }}" class="px-2.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white">
+      </div>
+
+      <div class="flex items-center gap-2 w-full md:w-auto">
+        <button type="submit" class="w-full md:w-auto px-4 py-2 bg-slate-900 dark:bg-slate-800 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-colors">
+          Filter
+        </button>
+        <a href="{{ url_for('sales.index') }}" class="px-3 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+          Reset
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Primary Sales Ledger Table -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead class="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-mono uppercase tracking-wider text-slate-400">
+          <tr>
+            <th class="px-5 py-3.5">Receipt # &amp; Date</th>
+            <th class="px-5 py-3.5">Cashier</th>
+            <th class="px-5 py-3.5">Payment</th>
+            <th class="px-5 py-3.5 text-right">Subtotal</th>
+            <th class="px-5 py-3.5 text-right">Discount</th>
+            <th class="px-5 py-3.5 text-right">VAT (16%)</th>
+            <th class="px-5 py-3.5 text-right">Grand Total</th>
+            <th class="px-5 py-3.5 text-center">Status</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          {% for s in sales %}
+          <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+            <td class="px-5 py-3.5">
+              <span class="font-mono font-bold text-slate-900 dark:text-white block">{{ s.receipt_no }}</span>
+              <span class="text-[11px] text-slate-400">{{ s.sale_date }}</span>
+            </td>
+            <td class="px-5 py-3.5 font-medium text-slate-700 dark:text-slate-300">
+              {{ s.cashier_snapshot }}
+            </td>
+            <td class="px-5 py-3.5">
+              <span class="font-semibold uppercase text-slate-800 dark:text-slate-200">{{ s.payment_method }}</span>
+              {% if s.payment_reference %}
+              <span class="block text-[10px] font-mono text-slate-400">{{ s.payment_reference }}</span>
+              {% endif %}
+            </td>
+            <td class="px-5 py-3.5 text-right font-mono font-semibold text-slate-700 dark:text-slate-300">
+              {{ format_kes(s.subtotal_cents) }}
+            </td>
+            <td class="px-5 py-3.5 text-right font-mono text-emerald-600 dark:text-emerald-400">
+              {% if s.discount_cents > 0 %}-{{ format_kes(s.discount_cents) }}{% else %}-{% endif %}
+            </td>
+            <td class="px-5 py-3.5 text-right font-mono text-slate-500">
+              {{ format_kes(s.tax_cents) }}
+            </td>
+            <td class="px-5 py-3.5 text-right font-mono font-bold text-slate-900 dark:text-white text-sm">
+              {{ format_kes(s.total_cents) }}
+            </td>
+            <td class="px-5 py-3.5 text-center">
+              {% if s.status == 'completed' %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Completed
+              </span>
+              {% else %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800" title="{{ s.void_reason }}">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                Voided
+              </span>
+              {% endif %}
+            </td>
+            <td class="px-5 py-3.5 text-right whitespace-nowrap">
+              <button onclick="openSaleModal({{ s.sale_id }})" class="px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold mr-1 transition-colors">
+                Receipt
+              </button>
+
+              {% if current_user and current_user.role == 'owner' and s.status == 'completed' %}
+              <button onclick="openVoidModal({{ s.sale_id }}, '{{ s.receipt_no }}')" class="px-2.5 py-1.5 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-xs font-semibold transition-colors">
+                Void
+              </button>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="9" class="py-12 text-center text-slate-400">
+              <span class="material-symbols-outlined text-4xl mb-2">receipt</span>
+              <p class="text-xs font-medium">No sales transactions found for this query.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Server-Side Pagination Bar -->
+    <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+      <div>
+        Showing page <strong class="text-slate-800 dark:text-slate-200">{{ page }}</strong> of <strong class="text-slate-800 dark:text-slate-200">{{ total_pages }}</strong> ({{ total_rows }} transactions)
+      </div>
+
+      <div class="flex items-center gap-1">
+        {% if page > 1 %}
+        <a href="{{ url_for('sales.index', page=page-1, status=status_filter, payment=payment_filter, q=search, start_date=start_date, end_date=end_date) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-colors">
+          Previous
+        </a>
+        {% endif %}
+        {% if page < total_pages %}
+        <a href="{{ url_for('sales.index', page=page+1, status=status_filter, payment=payment_filter, q=search, start_date=start_date, end_date=end_date) }}" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold transition-colors">
+          Next
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ================= MODAL: RECEIPT INSPECTION ================= -->
+<div id="receiptModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden font-mono text-xs animate-in zoom-in-95 duration-150">
+    <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <h3 class="font-bold text-slate-900 dark:text-white" id="modalReceiptTitle">Receipt Details</h3>
+      <button onclick="closeSaleModal()" class="text-slate-400 hover:text-slate-600">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+    </div>
+
+    <div id="modalReceiptBody" class="p-4 space-y-3 max-h-[70vh] overflow-y-auto">
+      <div class="text-center text-slate-400 py-6">Loading receipt lines...</div>
+    </div>
+
+    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+      <button onclick="closeSaleModal()" class="px-4 py-1.5 bg-slate-900 dark:bg-slate-700 text-white font-bold text-xs rounded-lg">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: VOID AUTHORIZATION ================= -->
+<div id="voidModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+    <div class="p-4 border-b border-rose-100 dark:border-rose-950/60 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between">
+      <div class="flex items-center gap-2 text-rose-700 dark:text-rose-400">
+        <span class="material-symbols-outlined text-xl">warning</span>
+        <h3 class="font-bold text-xs" id="voidModalTitle">Authorize Sale Reversal</h3>
+      </div>
+      <button onclick="closeVoidModal()" class="text-slate-400 hover:text-slate-600">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+    </div>
+
+    <form id="voidForm" method="POST" action="" class="p-4 space-y-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-800 dark:text-amber-300">
+        <strong>Inventory Restitution Notice:</strong> Voiding this transaction will atomically restitute all purchased item quantities back into available inventory and return sold serials to stock.
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+          Formal Reason for Voiding *
+        </label>
+        <textarea name="reason" rows="3" required placeholder="e.g. Customer returned items within same-day window / cashier tender entry error"
+                  class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500"></textarea>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2">
+        <button type="button" onclick="closeVoidModal()" class="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+          Cancel
+        </button>
+        <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors">
+          Confirm Void &amp; Restitute Stock
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function formatKes(cents) {
+    const val = (cents / 100).toFixed(2);
+    const parts = val.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `KES ${parts.join('.')}`;
+  }
+
+  async function openSaleModal(saleId) {
+    const modal = document.getElementById('receiptModal');
+    const body = document.getElementById('modalReceiptBody');
+    body.innerHTML = '<div class="text-center text-slate-400 py-6">Loading receipt lines...</div>';
+    modal.classList.remove('hidden');
+
+    try {
+      const res = await fetch(`/sales/${saleId}/detail`);
+      const data = await res.json();
+      if (!data.success) {
+        body.innerHTML = `<div class="text-center text-rose-500 py-6">${data.error}</div>`;
+        return;
+      }
+
+      const s = data.sale;
+      const items = data.items;
+      document.getElementById('modalReceiptTitle').textContent = `Receipt ${s.receipt_no}`;
+
+      body.innerHTML = `
+        <div class="pb-3 border-b border-dashed border-slate-300 dark:border-slate-700 text-[11px] space-y-1">
+          <div class="flex justify-between"><span>Date:</span><span>${s.sale_date}</span></div>
+          <div class="flex justify-between"><span>Cashier:</span><span>${s.cashier_snapshot}</span></div>
+          <div class="flex justify-between"><span>Payment:</span><span class="uppercase">${s.payment_method} ${s.payment_reference ? '(' + s.payment_reference + ')' : ''}</span></div>
+          <div class="flex justify-between"><span>Status:</span><span class="uppercase font-bold ${s.status === 'completed' ? 'text-emerald-600' : 'text-rose-600'}">${s.status}</span></div>
+          ${s.void_reason ? `<div class="text-rose-600 text-[10px] mt-1">Void Reason: ${s.void_reason}</div>` : ''}
+        </div>
+
+        <div class="py-2 border-b border-dashed border-slate-300 dark:border-slate-700 space-y-2">
+          ${items.map(it => `
+            <div>
+              <div class="flex justify-between font-bold text-slate-800 dark:text-slate-200">
+                <span class="truncate pr-2">${it.product_name_snapshot}</span>
+                <span>${formatKes(it.unit_price_cents * it.quantity - (it.discount_cents || 0))}</span>
+              </div>
+              <div class="flex justify-between text-[10px] text-slate-500">
+                <span>${it.quantity}x @ ${formatKes(it.unit_price_cents)}</span>
+                ${it.serial_no_snapshot ? `<span class="text-purple-600 font-bold">SN: ${it.serial_no_snapshot}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="pt-2 text-[11px] space-y-1 text-slate-600 dark:text-slate-400">
+          <div class="flex justify-between"><span>Subtotal:</span><span>${formatKes(s.subtotal_cents)}</span></div>
+          ${s.discount_cents > 0 ? `<div class="flex justify-between text-emerald-600"><span>Discount:</span><span>-${formatKes(s.discount_cents)}</span></div>` : ''}
+          <div class="flex justify-between"><span>VAT (16% Included):</span><span>${formatKes(s.tax_cents)}</span></div>
+          <div class="flex justify-between text-sm font-bold text-slate-900 dark:text-white pt-1">
+            <span>TOTAL:</span><span>${formatKes(s.total_cents)}</span>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      body.innerHTML = '<div class="text-center text-rose-500 py-6">Failed to load transaction details.</div>';
+    }
+  }
+
+  function closeSaleModal() {
+    document.getElementById('receiptModal').classList.add('hidden');
+  }
+
+  function openVoidModal(saleId, receiptNo) {
+    document.getElementById('voidModalTitle').textContent = `Authorize Void for ${receiptNo}`;
+    document.getElementById('voidForm').action = `/sales/${saleId}/void`;
+    document.getElementById('voidModal').classList.remove('hidden');
+  }
+
+  function closeVoidModal() {
+    document.getElementById('voidModal').classList.add('hidden');
+  }
+</script>
+{% endblock %}

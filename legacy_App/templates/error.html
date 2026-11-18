@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<section class="card narrow center">
+  <h1>{{ code }} · {{ title }}</h1>
+  {% if message %}<p>{{ message }}</p>{% endif %}
+  <a class="btn btn-primary" href="{{ url_for('main.inventory') if g.user else url_for('main.login') }}">Go back</a>
+</section>
+{% endblock %}

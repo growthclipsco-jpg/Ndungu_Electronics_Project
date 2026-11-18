@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Error {{ code }} — Ndungu Electronics IMS{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-16 px-4 text-center">
+  <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-8 shadow-xl shadow-slate-200/50 dark:shadow-none">
+    <div class="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-3xl">warning</span>
+    </div>
+    <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+      HTTP {{ code }}
+    </span>
+    <h1 class="text-xl font-bold text-slate-900 dark:text-white mt-3 tracking-tight">{{ title }}</h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+      {{ message }}
+    </p>
+
+    <div class="mt-8 flex items-center justify-center gap-3">
+      <a href="/" class="px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs shadow-md transition-colors flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-sm">home</span>
+        <span>Return to Dashboard</span>
+      </a>
+      <button onclick="window.history.back()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-300 dark:border-slate-700 transition-colors">
+        Go Back
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

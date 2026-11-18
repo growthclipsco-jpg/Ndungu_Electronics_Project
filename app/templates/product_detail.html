@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} · Product Details · Ndungu Electronics IMS{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+  <!-- Breadcrumbs & Navigation -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+      <a href="{{ url_for('inventory.index') }}" class="hover:text-teal-700 dark:hover:text-teal-400 font-medium">Inventory</a>
+      <span>/</span>
+      <span class="text-slate-700 dark:text-slate-200 font-semibold">{{ product.name }}</span>
+    </div>
+
+    <a href="{{ url_for('inventory.index') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+      <span class="material-symbols-outlined text-sm">arrow_back</span>
+      <span>Back to Catalog</span>
+    </a>
+  </div>
+
+  <!-- Header Banner -->
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800 flex items-center justify-center text-teal-700 dark:text-teal-400">
+        <span class="material-symbols-outlined text-3xl">{% if product.tracking_mode == 'serialized' %}devices{% else %}inventory_2{% endif %}</span>
+      </div>
+
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ product.name }}</h1>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase {% if product.tracking_mode == 'serialized' %}bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300{% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300{% endif %}">
+            {{ product.tracking_mode }}
+          </span>
+          {% if product.is_active %}
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Active</span>
+          {% else %}
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">Archived</span>
+          {% endif %}
+        </div>
+        <p class="font-mono text-xs text-slate-500 dark:text-slate-400 mt-1">
+          SKU: <strong class="text-slate-800 dark:text-slate-200">{{ product.sku }}</strong> • Brand: <strong>{{ product.brand }}</strong> • Category: <strong>{{ product.category_name }}</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      {% if current_user and current_user.role == 'owner' and product.is_active %}
+      <form method="POST" action="{{ url_for('inventory.archive_product', product_id=product.product_id) }}" onsubmit="return confirm('Archive this product? It will be hidden from new POS sales.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="px-4 py-2 border border-rose-200 dark:border-rose-800/60 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm">archive</span>
+          <span>Archive Product</span>
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left 2 Cols: Edit Metadata Form -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+        <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-teal-700">edit_note</span>
+          <span>Product Metadata &amp; Pricing</span>
+        </h2>
+
+        <form method="POST" action="{{ url_for('inventory.product_detail', product_id=product.product_id) }}" class="space-y-4">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Product Name *</label>
+              <input type="text" name="name" value="{{ product.name }}" required
+                     class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Brand *</label>
+              <input type="text" name="brand" value="{{ product.brand }}" required
+                     class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Model (Optional)</label>
+              <input type="text" name="model" value="{{ product.model or '' }}"
+                     class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Category *</label>
+              <select name="category_id" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+                {% for c in categories %}
+                <option value="{{ c.category_id }}" {% if c.category_id == product.category_id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Selling Price (KES) *</label>
+              <input type="number" step="0.01" name="price" value="{{ to_kes(product.price_cents) }}" required
+                     class="w-full px-3 py-2 font-mono text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Cost Price (KES)</label>
+              <input type="number" step="0.01" name="cost_price" value="{{ to_kes(product.cost_price_cents) }}"
+                     class="w-full px-3 py-2 font-mono text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Reorder Alert Threshold</label>
+              <input type="number" name="reorder_threshold" value="{{ product.reorder_threshold }}"
+                     class="w-full px-3 py-2 font-mono text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Suggested Reorder Qty</label>
+              <input type="number" name="reorder_qty" value="{{ product.reorder_qty }}"
+                     class="w-full px-3 py-2 font-mono text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Supplier Name</label>
+              <input type="text" name="supplier_name" value="{{ product.supplier_name or '' }}"
+                     class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Supplier Phone</label>
+              <input type="text" name="supplier_phone" value="{{ product.supplier_phone or '' }}"
+                     class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-700">
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+            <button type="submit" class="px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-base">save</span>
+              <span>Save Changes</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Stock Movement History Table -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+        <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-teal-700">history</span>
+          <span>Stock Movement Audit Trail</span>
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-400">
+                <th class="pb-2">Date &amp; Time</th>
+                <th class="pb-2">Event</th>
+                <th class="pb-2 text-right">Delta</th>
+                <th class="pb-2 text-right">Balance</th>
+                <th class="pb-2">Actor</th>
+                <th class="pb-2">Note</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300">
+              {% for m in movements %}
+              <tr>
+                <td class="py-2.5 text-[11px] text-slate-400">{{ m.created_at }}</td>
+                <td class="py-2.5">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {% if m.movement_type == 'restock' or m.movement_type == 'void_return' %}bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300{% elif m.movement_type == 'sale' %}bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300{% else %}bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                    {{ m.movement_type }}
+                  </span>
+                </td>
+                <td class="py-2.5 text-right font-bold {% if m.qty_delta > 0 %}text-emerald-600{% elif m.qty_delta < 0 %}text-rose-600{% endif %}">
+                  {% if m.qty_delta > 0 %}+{% endif %}{{ m.qty_delta }}
+                </td>
+                <td class="py-2.5 text-right font-bold text-slate-800 dark:text-slate-200">{{ m.stock_after }}</td>
+                <td class="py-2.5">{{ m.username_snapshot }}</td>
+                <td class="py-2.5 text-[11px] text-slate-400 truncate max-w-xs">{{ m.note or '-' }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="py-6 text-center text-slate-400">No stock movements recorded yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right 1 Col: Serial Numbers & Tracking -->
+    <div class="space-y-6">
+      
+      <!-- Current Stock Status Card -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Inventory Stock Level</h3>
+        <div class="flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold font-mono text-slate-900 dark:text-white">{{ product.stock }}</span>
+          <span class="text-xs text-slate-500 font-medium">units available</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">
+          {% if product.stock <= product.reorder_threshold %}
+          <span class="text-rose-600 font-bold">Low stock warning:</span> below threshold of {{ product.reorder_threshold }} units.
+          {% else %}
+          Stock is healthy (above threshold of {{ product.reorder_threshold }}).
+          {% endif %}
+        </p>
+      </div>
+
+      {% if product.tracking_mode == 'serialized' %}
+      <!-- Registered Serials / IMEI List -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Registered Hardware Serials</h3>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">{{ serials|length }} Total</span>
+        </div>
+
+        <div class="max-h-60 overflow-y-auto space-y-1.5 pr-1">
+          {% for s in serials %}
+          <div class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex items-center justify-between text-xs font-mono">
+            <span class="font-bold text-slate-800 dark:text-slate-200">{{ s.serial_no }}</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase {% if s.status == 'in_stock' %}bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300{% elif s.status == 'sold' %}bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300{% else %}bg-rose-50 text-rose-700{% endif %}">
+              {{ s.status }}
+            </span>
+          </div>
+          {% else %}
+          <p class="text-xs text-slate-400 py-3 text-center">No individual hardware serials registered.</p>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

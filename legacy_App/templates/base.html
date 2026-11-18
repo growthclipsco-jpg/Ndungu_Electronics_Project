@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · Ndungu Electronics IMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if g.user %}
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('main.inventory') }}">Ndungu Electronics <span>IMS</span></a>
+    <nav>
+      <a href="{{ url_for('main.inventory') }}" class="{{ 'active' if request.endpoint == 'main.inventory' else '' }}">
+        Inventory{% if low_stock_count %} <span class="badge" title="Low-stock products">{{ low_stock_count }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('main.sales_log') }}" class="{{ 'active' if request.endpoint == 'main.sales_log' else '' }}">Sales Log</a>
+      {% if g.user.role == 'owner' %}
+        <a href="{{ url_for('main.reports') }}" class="{{ 'active' if request.endpoint == 'main.reports' else '' }}">Reports</a>
+        <a href="{{ url_for('main.users') }}" class="{{ 'active' if request.endpoint == 'main.users' else '' }}">Users</a>
+      {% endif %}
+    </nav>
+    <div class="user">
+      <span>{{ g.user.username }} <small>({{ g.user.role }})</small></span>
+      <form method="post" action="{{ url_for('main.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">Log out</button>
+      </form>
+    </div>
+  </header>
+{% endif %}
+
+<main class="{{ 'container' if g.user else 'auth' }}">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}" role="alert">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

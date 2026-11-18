@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block content %}
+<section class="card auth-card">
+  <h1 class="auth-title">Ndungu Electronics<br>inventory management system</h1>
+  <form method="post" class="form" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="field-row">
+      <span class="pill-label">Username</span>
+      <input type="text" name="username" required autofocus maxlength="30">
+    </label>
+    <label class="field-row">
+      <span class="pill-label">Password</span>
+      <input type="password" name="password" required>
+    </label>
+    <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+  </form>
+  {% if first_run %}
+    <p class="muted center">First time here? <a href="{{ url_for('main.register') }}">Set up the owner account</a></p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html class="h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Ndungu Electronics IMS{% endblock %}</title>
+  <!-- Google Fonts: Plus Jakarta Sans & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            alabaster: '#F8FAFC',
+            slate: {
+              50: '#F8FAFC',
+              100: '#F1F5F9',
+              200: '#E2E8F0',
+              300: '#CBD5E1',
+              400: '#94A3B8',
+              500: '#64748B',
+              600: '#475569',
+              700: '#334155',
+              800: '#1E293B',
+              900: '#0F172A',
+              950: '#020617',
+            },
+            teal: {
+              50: '#F0FDFA',
+              100: '#CCFBF1',
+              200: '#99F6E4',
+              700: '#0F766E',
+              800: '#115E59',
+              900: '#134E4A',
+              950: '#042F2E',
+            }
+          },
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "sans-serif"],
+            mono: ["IBM Plex Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <script>
+    // Immediate Theme Initialization in head to prevent visual flash
+    (function() {
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
+  <style>
+    .font-mono-tabular { font-family: 'IBM Plex Mono', monospace; font-feature-settings: "tnum" 1; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans flex flex-col justify-between selection:bg-teal-100 selection:text-teal-900 relative transition-colors duration-150">
+
+  <!-- Header Strip with Navigation -->
+  <header class="relative z-10 w-full px-4 sm:px-6 py-3 flex items-center justify-between border-b border-slate-200/80 bg-white/90 dark:bg-slate-900/90 dark:border-slate-800 backdrop-blur-md">
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-3">
+        <a href="/" class="w-9 h-9 rounded-lg bg-teal-700 flex items-center justify-center text-white shadow-sm ring-2 ring-teal-700/20 active:scale-95 transition-transform">
+          <span class="material-symbols-outlined text-xl">bolt</span>
+        </a>
+        <div>
+          <a href="/" class="font-bold text-slate-900 dark:text-white tracking-tight text-sm leading-tight block">Ndungu Electronics</a>
+          <span class="font-mono text-[11px] text-slate-500 dark:text-slate-400">Thika Main IMS</span>
+        </div>
+      </div>
+
+      {% if current_user %}
+        <!-- Primary Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="{{ url_for('inventory.index') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {% if request.blueprint == 'inventory' %}bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 font-bold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800{% endif %}">
+            <span class="material-symbols-outlined text-base">inventory_2</span>
+            <span>Inventory</span>
+          </a>
+          <a href="{{ url_for('pos.register') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {% if request.blueprint == 'pos' %}bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 font-bold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800{% endif %}">
+            <span class="material-symbols-outlined text-base">point_of_sale</span>
+            <span>POS Register</span>
+          </a>
+          <a href="{{ url_for('sales.index') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {% if request.blueprint == 'sales' %}bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 font-bold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800{% endif %}">
+            <span class="material-symbols-outlined text-base">receipt_long</span>
+            <span>Sales Ledger</span>
+          </a>
+
+          {% if current_user.role == 'owner' %}
+          <a href="{{ url_for('promotions.index') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {% if request.blueprint == 'promotions' %}bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 font-bold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800{% endif %}">
+            <span class="material-symbols-outlined text-base">sell</span>
+            <span>Promotions</span>
+          </a>
+          <a href="{{ url_for('reports.index') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {% if request.blueprint == 'reports' %}bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 font-bold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800{% endif %}">
+            <span class="material-symbols-outlined text-base">analytics</span>
+            <span>BI Reports</span>
+          </a>
+          <a href="{{ url_for('users.index') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {% if request.blueprint == 'users' %}bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 font-bold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800{% endif %}">
+            <span class="material-symbols-outlined text-base">manage_accounts</span>
+            <span>Users &amp; Audit</span>
+          </a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Dark Mode Toggle Button -->
+      <button type="button" onclick="toggleDarkMode()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors" title="Toggle Dark/Light Mode">
+        <span class="material-symbols-outlined text-lg dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined text-lg hidden dark:inline">light_mode</span>
+      </button>
+
+      {% if current_user %}
+        <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="font-medium text-slate-700 dark:text-slate-200">{{ current_user.username }}</span>
+          <span class="px-1.5 py-0.2 rounded bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300 text-[10px] font-mono font-bold uppercase">{{ current_user.role }}</span>
+        </div>
+        <form method="POST" action="{{ url_for('auth.logout') }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors" title="Sign Out">
+            <span class="material-symbols-outlined text-lg">logout</span>
+          </button>
+        </form>
+      {% else %}
+        <div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-600 dark:text-slate-300">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>NODE READY</span>
+        </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="max-w-2xl mx-auto w-full px-4 pt-4">
+        {% for category, message in messages %}
+          <div class="p-4 mb-3 rounded-xl border text-xs font-medium flex items-center justify-between shadow-sm {% if category == 'error' %}bg-rose-50 border-rose-200 text-rose-800{% elif category == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800{% else %}bg-amber-50 border-amber-200 text-amber-800{% endif %}">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-base">{% if category == 'error' %}error{% elif category == 'success' %}check_circle{% else %}info{% endif %}</span>
+              <span>{{ message }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Main Body Content -->
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Technical Footer -->
+  <footer class="w-full py-4 px-6 border-t border-slate-200/60 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xs text-xs font-mono text-slate-500 dark:text-slate-400">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+      <div>Ndungu Electronics Ltd • Thika Main Branch • Zetech DSE-01-0145/2025</div>
+      <div class="text-slate-400 dark:text-slate-500">Terminal: THK-POS-8842 • KES Currency Cents • +16% VAT</div>
+    </div>
+  </footer>
+
+  <script>
+    function initTheme() {
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.theme = 'light';
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.theme = 'dark';
+      }
+    }
+    initTheme();
+  </script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

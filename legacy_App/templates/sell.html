@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Sell {{ product.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Record a sale</h1>
+  <a class="btn btn-ghost" href="{{ url_for('main.inventory') }}">← Back to inventory</a>
+</div>
+
+<section class="card narrow">
+  <dl class="details">
+    <dt>Product</dt><dd><strong>{{ product.name }}</strong> <small class="muted">{{ product.brand }}{% if product.model %} · {{ product.model }}{% endif %}</small></dd>
+    <dt>Serial No</dt><dd class="mono">{{ product.serial_no }}</dd>
+    <dt>Unit price</dt><dd>{{ product.price|kes }}</dd>
+    <dt>In stock</dt><dd>{{ product.stock }} {% if product.stock < LOW_STOCK_THRESHOLD %}<span class="tag tag-low">low</span>{% endif %}</dd>
+  </dl>
+
+  {% if product.stock > 0 %}
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Quantity
+      <input type="number" name="quantity" id="quantity" value="{{ quantity }}" min="1" max="{{ product.stock }}" step="1" required autofocus
+             data-unit-price="{{ product.price }}">
+    </label>
+    <p class="total">Total: <strong id="sale-total">{{ (product.price * (quantity|int if quantity|int > 0 else 0))|kes }}</strong></p>
+    <button class="btn btn-primary btn-block" type="submit">Confirm sale</button>
+  </form>
+  {% else %}
+    <div class="flash flash-error">This product is out of stock and cannot be sold.</div>
+  {% endif %}
+</section>
+{% endblock %}

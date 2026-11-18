@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Users &amp; Audit Trail · Ndungu Electronics IMS{% endblock %}
+
+{% block extra_head %}
+<style>
+  .font-mono-numbers {
+    font-family: 'IBM Plex Mono', monospace;
+    font-feature-settings: 'tnum' on, 'zero' on;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+  <!-- Header Banner -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Users &amp; Security Audit Trail</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        Manage operator credentials, mint 24-hour single-use invite links, and review tamper-evident audit logs.
+      </p>
+    </div>
+
+    <!-- Mint Invite Action -->
+    <form method="POST" action="{{ url_for('users.create_invite') }}" class="flex items-center gap-2">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <select name="role" class="px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white">
+        <option value="attendant">Role: Attendant</option>
+        <option value="owner">Role: Owner</option>
+      </select>
+      <button type="submit" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5 shrink-0">
+        <span class="material-symbols-outlined text-base">person_add</span>
+        <span>Mint Invite Link</span>
+      </button>
+    </form>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left 2 Cols: User Accounts & Invite Tokens -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Active Operator Accounts Table -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-teal-700">group</span>
+            <h2 class="text-sm font-bold text-slate-900 dark:text-white">Operator Accounts</h2>
+          </div>
+          <span class="text-xs font-mono text-slate-400">{{ users|length }} Operators Registered</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-mono uppercase text-slate-400">
+              <tr>
+                <th class="px-5 py-3.5">Operator</th>
+                <th class="px-5 py-3.5">Role</th>
+                <th class="px-5 py-3.5 text-center">Security Status</th>
+                <th class="px-5 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              {% for u in users %}
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                <td class="px-5 py-3.5">
+                  <span class="font-bold text-slate-900 dark:text-white block">{{ u.full_name or u.username }}</span>
+                  <span class="text-[11px] font-mono text-slate-400">@{{ u.username }}</span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase {% if u.role == 'owner' %}bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300{% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300{% endif %}">
+                    {{ u.role }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-center">
+                  {% if u.locked_until %}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                    Locked Out
+                  </span>
+                  {% elif not u.is_active %}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                    Deactivated
+                  </span>
+                  {% else %}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Active
+                  </span>
+                  {% endif %}
+                </td>
+                <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                  {% if u.locked_until %}
+                  <form method="POST" action="{{ url_for('users.unlock_user', user_id=u.user_id) }}" class="inline mr-1">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 font-semibold text-xs border border-rose-200 dark:border-rose-900 transition-colors">
+                      Unlock Account
+                    </button>
+                  </form>
+                  {% endif %}
+
+                  {% if u.user_id != current_user.user_id %}
+                  <form method="POST" action="{{ url_for('users.toggle_user_status', user_id=u.user_id) }}" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors {% if u.is_active %}text-rose-600{% else %}text-emerald-600{% endif %}">
+                      {% if u.is_active %}Deactivate{% else %}Enable{% endif %}
+                    </button>
+                  </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Single-Use 24h Invite Tokens Table -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-purple-600 text-base">link</span>
+          <span>Recent Invitation Tokens (24h Validity)</span>
+        </h3>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 uppercase">
+                <th class="pb-2">Token ID</th>
+                <th class="pb-2">Role</th>
+                <th class="pb-2">Issued At</th>
+                <th class="pb-2">Expires At</th>
+                <th class="pb-2 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300">
+              {% for t in tokens %}
+              <tr>
+                <td class="py-2">#{{ t.token_id }}</td>
+                <td class="py-2 uppercase font-bold">{{ t.role }}</td>
+                <td class="py-2 text-[11px] text-slate-400">{{ t.created_at[:16] }}</td>
+                <td class="py-2 text-[11px] text-slate-400">{{ t.expires_at[:16] }}</td>
+                <td class="py-2 text-right">
+                  {% if t.used_at %}
+                  <span class="text-slate-400">Claimed</span>
+                  {% else %}
+                  <span class="text-emerald-600 font-bold">Unused</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="py-4 text-center text-slate-400 font-sans">No invite tokens minted yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right 1 Col: Unified Security Audit Trail -->
+    <div class="space-y-6">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-teal-700 text-base">security</span>
+          <span>Unified Security Audit Trail</span>
+        </h3>
+
+        <div class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
+          {% for ev in events %}
+          <div class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 text-xs font-mono space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase {% if ev.event_type in ('login_ok', 'restock') %}bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300{% elif ev.event_type in ('login_fail', 'locked', 'sale_void') %}bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300{% else %}bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                {{ ev.event_type }}
+              </span>
+              <span class="text-[10px] text-slate-400">{{ ev.created_at[:16] }}</span>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-slate-700 dark:text-slate-300">
+              <span class="font-bold">@{{ ev.username }}</span>
+              {% if ev.ip_address %}
+              <span class="text-slate-400 text-[10px]">{{ ev.ip_address }}</span>
+              {% endif %}
+            </div>
+
+            {% if ev.details %}
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ ev.details }}</p>
+            {% endif %}
+          </div>
+          {% else %}
+          <p class="text-xs text-slate-400 py-6 text-center">No security audit events logged.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,706 @@
+{% extends "base.html" %}
+
+{% block title %}POS Register · Ndungu Electronics IMS{% endblock %}
+
+{% block extra_head %}
+<style>
+  .font-mono-numbers {
+    font-family: 'IBM Plex Mono', monospace;
+    font-feature-settings: 'tnum' on, 'zero' on;
+  }
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="h-[calc(100vh-65px)] flex flex-col md:flex-row overflow-hidden bg-slate-50 dark:bg-slate-950">
+
+  <!-- ================= LEFT: PRODUCT CATALOG & SEARCH ================= -->
+  <section class="flex-1 flex flex-col min-w-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950">
+    
+    <!-- Top Bar: Search Omnibar & Category Filters -->
+    <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col gap-3">
+      <div class="flex items-center gap-3">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+          <input type="text" id="posSearch" placeholder="Search product name, brand, SKU... (Press Ctrl+K)"
+                 class="w-full pl-9 pr-16 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-teal-700 dark:focus:ring-teal-500 transition-all"
+                 autofocus>
+          <kbd class="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded shadow-2xs">Ctrl K</kbd>
+        </div>
+
+        <button type="button" onclick="clearSearch()" class="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+          Reset
+        </button>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs select-none">
+        <button type="button" onclick="filterCategory('all', this)"
+                class="category-pill active-cat px-3 py-1 rounded-full font-semibold transition-colors bg-teal-700 text-white shadow-2xs">
+          All Items
+        </button>
+        {% for cat in categories|default([]) %}
+        <button type="button" onclick="filterCategory('{{ cat.name|lower }}', this)"
+                class="category-pill px-3 py-1 rounded-full font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+          {{ cat.name }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Catalog Product Grid -->
+    <div class="flex-1 overflow-y-auto p-4">
+      <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {% for p in products %}
+        <div class="product-card group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex flex-col justify-between hover:shadow-md hover:border-teal-600/50 dark:hover:border-teal-500/50 transition-all cursor-pointer relative"
+             data-id="{{ p.product_id }}"
+             data-sku="{{ p.sku }}"
+             data-name="{{ p.name }}"
+             data-brand="{{ p.brand }}"
+             data-price="{{ p.price_cents }}"
+             data-stock="{{ p.stock }}"
+             data-category="{{ p.category_name|lower }}"
+             data-tracking="{{ p.tracking_mode }}"
+             onclick="addToCart({{ p.product_id }})">
+          
+          <div>
+            <div class="flex items-start justify-between gap-1 mb-1">
+              <span class="text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 uppercase truncate">{{ p.brand }}</span>
+              <span class="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded {% if p.tracking_mode == 'serialized' %}bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800{% else %}bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                {{ p.tracking_mode }}
+              </span>
+            </div>
+            
+            <h3 class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 line-clamp-2 leading-snug transition-colors">
+              {{ p.name }}
+            </h3>
+            
+            <p class="font-mono text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">SKU: {{ p.sku }}</p>
+          </div>
+
+          <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-slate-400 block -mb-0.5">Price</span>
+              <span class="font-mono font-bold text-xs text-slate-900 dark:text-white">{{ format_kes(p.price_cents) }}</span>
+            </div>
+
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 block -mb-0.5">Stock</span>
+              <span class="font-mono font-semibold text-xs {% if p.stock <= 3 %}text-rose-600 dark:text-rose-400{% elif p.stock <= 5 %}text-amber-600 dark:text-amber-400{% else %}text-emerald-600 dark:text-emerald-400{% endif %}">
+                {{ p.stock }} units
+              </span>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="col-span-full py-16 text-center text-slate-400">
+          <span class="material-symbols-outlined text-4xl mb-2">inventory_2</span>
+          <p class="text-xs font-medium">No active products in stock.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RIGHT: ACTIVE POS CART ================= -->
+  <aside class="w-full md:w-96 lg:w-[420px] flex flex-col bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 h-full shadow-lg z-20">
+    
+    <!-- Cart Header -->
+    <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-teal-700 dark:text-teal-400">shopping_cart</span>
+        <h2 class="text-sm font-bold text-slate-900 dark:text-white">Active Counter Cart</h2>
+        <span id="cartCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300">0</span>
+      </div>
+
+      <button type="button" onclick="clearCart()" class="text-[11px] font-medium text-rose-600 hover:text-rose-700 dark:text-rose-400 flex items-center gap-1 transition-colors">
+        <span class="material-symbols-outlined text-sm">delete_sweep</span>
+        <span>Clear</span>
+      </button>
+    </div>
+
+    <!-- Cart Items Scroll Area -->
+    <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3">
+      <!-- Empty Cart State -->
+      <div id="emptyCartState" class="h-full flex flex-col items-center justify-center text-center text-slate-400 p-6">
+        <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 text-slate-300 dark:text-slate-600">
+          <span class="material-symbols-outlined text-3xl">shopping_basket</span>
+        </div>
+        <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Cart is empty</h4>
+        <p class="text-[11px] text-slate-400 mt-1 max-w-[200px]">Click any product from the catalog on the left to start a transaction.</p>
+      </div>
+
+      <!-- Items Table rendered via JS -->
+      <div id="cartItemsList" class="space-y-2 hidden"></div>
+    </div>
+
+    <!-- Active Promo / Coupon Code -->
+    <div class="p-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/50">
+      <div class="flex gap-2">
+        <div class="relative flex-1">
+          <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">sell</span>
+          <input type="text" id="promoCodeInput" placeholder="Promo code (e.g. THIKA5)"
+                 class="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs uppercase font-mono tracking-wider text-slate-900 dark:text-white placeholder:normal-case placeholder:tracking-normal placeholder:text-slate-400 focus:ring-1 focus:ring-teal-700">
+        </div>
+        <button type="button" onclick="applyPromoCode()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 text-white text-xs font-semibold rounded-lg transition-colors">
+          Apply
+        </button>
+      </div>
+      <div id="promoNotice" class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 mt-1 hidden"></div>
+    </div>
+
+    <!-- Financial Summary (Locked VAT Arithmetic: subtotal - discount + 16% tax) -->
+    <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2 select-none">
+      <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+        <span>Items Subtotal</span>
+        <span id="summarySubtotal" class="font-mono font-medium text-slate-700 dark:text-slate-300">KES 0.00</span>
+      </div>
+
+      <div class="flex justify-between text-xs text-emerald-600 dark:text-emerald-400">
+        <span>Promotion Discount</span>
+        <span id="summaryDiscount" class="font-mono font-medium">- KES 0.00</span>
+      </div>
+
+      <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+        <span class="flex items-center gap-1">
+          <span>VAT (16% Statutory)</span>
+          <span class="text-[10px] text-slate-400" title="Applied on post-discount subtotal">ⓘ</span>
+        </span>
+        <span id="summaryVat" class="font-mono font-medium text-slate-700 dark:text-slate-300">+ KES 0.00</span>
+      </div>
+
+      <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between items-baseline">
+        <span class="text-sm font-bold text-slate-900 dark:text-white">Payable Total</span>
+        <span id="summaryGrandTotal" class="font-mono font-extrabold text-lg text-teal-800 dark:text-teal-400">KES 0.00</span>
+      </div>
+
+      <!-- Payment Method Selector -->
+      <div class="pt-2">
+        <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400 block mb-1.5 uppercase tracking-wider">Payment Method</label>
+        <div class="grid grid-cols-3 gap-2">
+          <label class="cursor-pointer">
+            <input type="radio" name="paymentMethod" value="cash" checked class="peer sr-only" onchange="updatePaymentMode(this.value)">
+            <div class="p-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-teal-700 peer-checked:bg-teal-50 peer-checked:text-teal-900 dark:peer-checked:bg-teal-950/60 dark:peer-checked:text-teal-300 dark:peer-checked:border-teal-500 text-xs font-semibold text-slate-600 dark:text-slate-400 transition-all">
+              Cash
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="paymentMethod" value="mpesa" class="peer sr-only" onchange="updatePaymentMode(this.value)">
+            <div class="p-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-teal-700 peer-checked:bg-teal-50 peer-checked:text-teal-900 dark:peer-checked:bg-teal-950/60 dark:peer-checked:text-teal-300 dark:peer-checked:border-teal-500 text-xs font-semibold text-slate-600 dark:text-slate-400 transition-all">
+              M-Pesa
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="paymentMethod" value="card" class="peer sr-only" onchange="updatePaymentMode(this.value)">
+            <div class="p-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-teal-700 peer-checked:bg-teal-50 peer-checked:text-teal-900 dark:peer-checked:bg-teal-950/60 dark:peer-checked:text-teal-300 dark:peer-checked:border-teal-500 text-xs font-semibold text-slate-600 dark:text-slate-400 transition-all">
+              Card
+            </div>
+          </label>
+        </div>
+
+        <!-- M-Pesa / Reference Field -->
+        <div id="paymentRefRow" class="mt-2 hidden">
+          <input type="text" id="paymentReferenceInput" placeholder="M-Pesa Ref (e.g. QHX7892K)"
+                 class="w-full px-3 py-1.5 text-xs font-mono uppercase bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:normal-case placeholder:font-sans">
+        </div>
+      </div>
+
+      <!-- Complete Sale Action CTA -->
+      <button type="button" id="btnCheckout" onclick="submitCheckout()" disabled
+              class="w-full mt-2 py-3 px-4 bg-teal-700 hover:bg-teal-800 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 text-white font-bold text-sm rounded-xl shadow-sm transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        <span id="btnCheckoutLabel">Authorize Sale</span>
+      </button>
+    </div>
+  </aside>
+</div>
+
+<!-- ================= MODAL / DRAWER: SERIAL NUMBER SELECTION ================= -->
+<div id="serialModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-purple-600">qr_code_2</span>
+        <h3 class="text-xs font-bold text-slate-900 dark:text-white" id="modalProductName">Select Serial Number</h3>
+      </div>
+      <button type="button" onclick="closeSerialModal()" class="text-slate-400 hover:text-slate-600">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+    </div>
+
+    <div class="p-4 space-y-3">
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        This high-value device requires a unique hardware serial or IMEI registration to bind to the customer receipt.
+      </p>
+
+      <div id="serialPickerList" class="max-h-48 overflow-y-auto space-y-1.5">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
+      <button type="button" onclick="closeSerialModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 rounded-lg">
+        Cancel
+      </button>
+      <button type="button" onclick="confirmSerialSelection()" class="px-4 py-1.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-lg shadow-2xs">
+        Confirm Unit
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL / DRAWER: S-06 SLIDE-OVER RECEIPT PREVIEW ================= -->
+<div id="receiptDrawer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex justify-end hidden">
+  <div class="bg-white dark:bg-slate-900 w-full max-w-md h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-200">
+    <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-teal-700">receipt_long</span>
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Transaction Receipt</h3>
+      </div>
+      <button type="button" onclick="closeReceiptDrawer()" class="text-slate-400 hover:text-slate-600">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Printable Receipt Content Area -->
+    <div id="receiptContent" class="flex-1 overflow-y-auto p-4 bg-slate-100 dark:bg-slate-950/60">
+      <!-- Receipt rendered here -->
+    </div>
+
+    <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-2">
+      <button type="button" onclick="printReceipt()" class="flex-1 py-2.5 px-4 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2 transition-colors">
+        <span class="material-symbols-outlined text-base">print</span>
+        <span>Print Receipt (80mm)</span>
+      </button>
+      <button type="button" onclick="closeReceiptDrawer()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
+        New Sale
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // In-memory catalog mapping & Cart state
+  const catalog = {
+    {% for p in products %}
+    {{ p.product_id }}: {
+      id: {{ p.product_id }},
+      sku: "{{ p.sku }}",
+      name: "{{ p.name }}",
+      brand: "{{ p.brand }}",
+      price_cents: {{ p.price_cents }},
+      stock: {{ p.stock }},
+      tracking: "{{ p.tracking_mode }}"
+    },
+    {% endfor %}
+  };
+
+  let cart = []; // Array of { product_id, quantity, serial_no }
+  let activePromo = null;
+  let pendingSerialProduct = null;
+  let selectedSerial = null;
+
+  // Formatting helper
+  function formatKes(cents) {
+    const val = (cents / 100).toFixed(2);
+    const parts = val.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `KES ${parts.join('.')}`;
+  }
+
+  // Keyboard shortcut Ctrl+K to search
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      document.getElementById('posSearch').focus();
+    }
+  });
+
+  // Search filter
+  document.getElementById('posSearch').addEventListener('input', function(e) {
+    const q = e.target.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.product-card');
+    cards.forEach(card => {
+      const name = card.dataset.name.toLowerCase();
+      const brand = card.dataset.brand.toLowerCase();
+      const sku = card.dataset.sku.toLowerCase();
+      if (!q || name.includes(q) || brand.includes(q) || sku.includes(q)) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+
+  function clearSearch() {
+    const input = document.getElementById('posSearch');
+    input.value = '';
+    const cards = document.querySelectorAll('.product-card');
+    cards.forEach(card => card.style.display = '');
+    input.focus();
+  }
+
+  // Category Pill Filter
+  function filterCategory(catName, btn) {
+    document.querySelectorAll('.category-pill').forEach(b => {
+      b.classList.remove('bg-teal-700', 'text-white', 'shadow-2xs');
+      b.classList.add('bg-white', 'text-slate-600', 'dark:bg-slate-800', 'dark:text-slate-300');
+    });
+    btn.classList.add('bg-teal-700', 'text-white', 'shadow-2xs');
+    btn.classList.remove('bg-white', 'text-slate-600', 'dark:bg-slate-800', 'dark:text-slate-300');
+
+    const cards = document.querySelectorAll('.product-card');
+    cards.forEach(card => {
+      if (catName === 'all' || card.dataset.category === catName) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  // Add Item to Cart
+  function addToCart(productId) {
+    const p = catalog[productId];
+    if (!p) return;
+
+    if (p.stock <= 0) {
+      alert(`Product ${p.name} is currently out of stock.`);
+      return;
+    }
+
+    // Check if serialized
+    if (p.tracking === 'serialized') {
+      promptSerialSelection(p);
+      return;
+    }
+
+    const existing = cart.find(item => item.product_id === productId);
+    if (existing) {
+      if (existing.quantity + 1 > p.stock) {
+        alert(`Cannot add more than ${p.stock} units of ${p.name}.`);
+        return;
+      }
+      existing.quantity += 1;
+    } else {
+      cart.push({
+        product_id: productId,
+        quantity: 1,
+        serial_no: ""
+      });
+    }
+
+    renderCart();
+  }
+
+  // Serial Number Modal Logic
+  async function promptSerialSelection(product) {
+    pendingSerialProduct = product;
+    document.getElementById('modalProductName').textContent = `Select Serial for ${product.name}`;
+    const list = document.getElementById('serialPickerList');
+    list.innerHTML = '<div class="text-xs text-slate-400 py-3 text-center">Loading serial numbers...</div>';
+    document.getElementById('serialModal').classList.remove('hidden');
+
+    try {
+      const res = await fetch(`/pos/serials/${product.id}`);
+      const data = await res.json();
+      if (data.success && data.serials.length > 0) {
+        list.innerHTML = data.serials.map((sn, idx) => `
+          <label class="flex items-center justify-between p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+            <div class="flex items-center gap-2">
+              <input type="radio" name="serialPick" value="${sn}" ${idx === 0 ? 'checked' : ''} onchange="selectedSerial = this.value" class="text-teal-700 focus:ring-teal-700">
+              <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">${sn}</span>
+            </div>
+            <span class="text-[10px] text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded font-mono font-medium">Available</span>
+          </label>
+        `).join('');
+        selectedSerial = data.serials[0];
+      } else {
+        list.innerHTML = '<div class="text-xs text-rose-500 py-3 text-center">No available in-stock serial numbers registered for this item.</div>';
+        selectedSerial = null;
+      }
+    } catch (err) {
+      list.innerHTML = '<div class="text-xs text-rose-500 py-3 text-center">Failed to fetch serials.</div>';
+    }
+  }
+
+  function closeSerialModal() {
+    document.getElementById('serialModal').classList.add('hidden');
+    pendingSerialProduct = null;
+    selectedSerial = null;
+  }
+
+  function confirmSerialSelection() {
+    if (!selectedSerial || !pendingSerialProduct) {
+      alert("Please select a valid hardware serial number.");
+      return;
+    }
+
+    // Add unique serialized line
+    cart.push({
+      product_id: pendingSerialProduct.id,
+      quantity: 1,
+      serial_no: selectedSerial
+    });
+
+    closeSerialModal();
+    renderCart();
+  }
+
+  // Quantity adjustments
+  function changeQty(index, delta) {
+    const item = cart[index];
+    const p = catalog[item.product_id];
+    const newQty = item.quantity + delta;
+
+    if (newQty <= 0) {
+      cart.splice(index, 1);
+    } else if (newQty > p.stock) {
+      alert(`Cannot add more than ${p.stock} units.`);
+      return;
+    } else {
+      item.quantity = newQty;
+    }
+    renderCart();
+  }
+
+  function removeFromCart(index) {
+    cart.splice(index, 1);
+    renderCart();
+  }
+
+  function clearCart() {
+    cart = [];
+    activePromo = null;
+    document.getElementById('promoCodeInput').value = '';
+    document.getElementById('promoNotice').classList.add('hidden');
+    renderCart();
+  }
+
+  // Render Cart DOM & compute locked +16% VAT arithmetic
+  function renderCart() {
+    const list = document.getElementById('cartItemsList');
+    const empty = document.getElementById('emptyCartState');
+    const badge = document.getElementById('cartCountBadge');
+    const btnCheckout = document.getElementById('btnCheckout');
+
+    badge.textContent = cart.reduce((acc, i) => acc + i.quantity, 0);
+
+    if (cart.length === 0) {
+      empty.classList.remove('hidden');
+      list.classList.add('hidden');
+      btnCheckout.disabled = true;
+      document.getElementById('summarySubtotal').textContent = 'KES 0.00';
+      document.getElementById('summaryDiscount').textContent = '- KES 0.00';
+      document.getElementById('summaryVat').textContent = '+ KES 0.00';
+      document.getElementById('summaryGrandTotal').textContent = 'KES 0.00';
+      return;
+    }
+
+    empty.classList.add('hidden');
+    list.classList.remove('hidden');
+    btnCheckout.disabled = false;
+
+    let subtotalCents = 0;
+
+    list.innerHTML = cart.map((item, idx) => {
+      const p = catalog[item.product_id];
+      const lineGross = p.price_cents * item.quantity;
+      subtotalCents += lineGross;
+
+      return `
+        <div class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between gap-2">
+          <div class="flex-1 min-w-0">
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">${p.name}</h4>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="font-mono text-[11px] text-slate-500 dark:text-slate-400">${formatKes(p.price_cents)}</span>
+              ${item.serial_no ? `<span class="px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 text-[10px] font-mono font-bold">SN: ${item.serial_no}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            ${p.tracking !== 'serialized' ? `
+              <div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 overflow-hidden">
+                <button type="button" onclick="changeQty(${idx}, -1)" class="px-2 py-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold">-</button>
+                <span class="px-2 py-1 text-xs font-mono font-bold text-slate-900 dark:text-white">${item.quantity}</span>
+                <button type="button" onclick="changeQty(${idx}, 1)" class="px-2 py-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold">+</button>
+              </div>
+            ` : `
+              <span class="px-2 py-1 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">1x</span>
+            `}
+
+            <span class="font-mono font-bold text-xs text-slate-900 dark:text-white w-20 text-right">${formatKes(lineGross)}</span>
+
+            <button type="button" onclick="removeFromCart(${idx})" class="p-1 text-slate-400 hover:text-rose-600 transition-colors">
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Promo calculation (simple simulation if code applied)
+    let discountCents = 0;
+    if (activePromo === 'THIKA5') {
+      discountCents = Math.round(subtotalCents * 0.05); // 5% off
+    }
+
+    const discountedSubtotal = Math.max(0, subtotalCents - discountCents);
+    // Locked VAT Policy: +16% on post-discount subtotal, round half up
+    const vatCents = Math.round(discountedSubtotal * 0.16);
+    const grandTotalCents = discountedSubtotal + vatCents;
+
+    document.getElementById('summarySubtotal').textContent = formatKes(subtotalCents);
+    document.getElementById('summaryDiscount').textContent = `- ${formatKes(discountCents)}`;
+    document.getElementById('summaryVat').textContent = `+ ${formatKes(vatCents)}`;
+    document.getElementById('summaryGrandTotal').textContent = formatKes(grandTotalCents);
+  }
+
+  function applyPromoCode() {
+    const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+    const notice = document.getElementById('promoNotice');
+    if (!code) {
+      activePromo = null;
+      notice.classList.add('hidden');
+      renderCart();
+      return;
+    }
+    activePromo = code;
+    notice.textContent = `Promo code "${code}" active on cart calculation.`;
+    notice.classList.remove('hidden');
+    renderCart();
+  }
+
+  function updatePaymentMode(val) {
+    const row = document.getElementById('paymentRefRow');
+    if (val === 'mpesa' || val === 'card') {
+      row.classList.remove('hidden');
+    } else {
+      row.classList.add('hidden');
+    }
+  }
+
+  // Submit Checkout via AJAX with CSRF
+  async function submitCheckout() {
+    if (cart.length === 0) return;
+
+    const btn = document.getElementById('btnCheckout');
+    const label = document.getElementById('btnCheckoutLabel');
+    btn.disabled = true;
+    label.textContent = "Processing Transaction...";
+
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const paymentRef = document.getElementById('paymentReferenceInput').value.trim();
+    const promoCode = document.getElementById('promoCodeInput').value.trim();
+
+    const payload = {
+      items: cart,
+      payment_method: paymentMethod,
+      payment_reference: paymentRef,
+      promo_code: promoCode
+    };
+
+    try {
+      const res = await fetch("/pos/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert("Transaction Failed: " + (data.error || "Unknown server error."));
+        btn.disabled = false;
+        label.textContent = "Authorize Sale";
+        return;
+      }
+
+      // Success: render Slide-Over Receipt Drawer
+      renderReceiptDrawer(data.receipt);
+      clearCart();
+      btn.disabled = false;
+      label.textContent = "Authorize Sale";
+    } catch (err) {
+      alert("Network or server communication error.");
+      btn.disabled = false;
+      label.textContent = "Authorize Sale";
+    }
+  }
+
+  // Render Receipt Drawer (S-06)
+  function renderReceiptDrawer(receipt) {
+    const container = document.getElementById('receiptContent');
+    const dateFormatted = receipt.sale_date || new Date().toLocaleString();
+
+    container.innerHTML = `
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm select-none font-mono text-xs">
+        <div class="text-center pb-4 border-b border-dashed border-slate-300 dark:border-slate-700">
+          <h2 class="font-headline font-extrabold text-base text-slate-900 dark:text-white tracking-tight">NDUNGU ELECTRONICS</h2>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Thika Main Branch · Kenyatta Highway</p>
+          <p class="text-[10px] text-slate-400">VAT PIN: P051239841K • TEL: +254 700 123 456</p>
+        </div>
+
+        <div class="py-3 border-b border-dashed border-slate-300 dark:border-slate-700 text-[11px] space-y-0.5 text-slate-600 dark:text-slate-400">
+          <div class="flex justify-between"><span>Receipt:</span><span class="font-bold text-slate-900 dark:text-white">${receipt.receipt_no}</span></div>
+          <div class="flex justify-between"><span>Date:</span><span>${dateFormatted}</span></div>
+          <div class="flex justify-between"><span>Cashier:</span><span>${receipt.cashier_snapshot}</span></div>
+          <div class="flex justify-between"><span>Payment:</span><span class="uppercase">${receipt.payment_method} ${receipt.payment_reference ? '(' + receipt.payment_reference + ')' : ''}</span></div>
+        </div>
+
+        <!-- Lines -->
+        <div class="py-3 border-b border-dashed border-slate-300 dark:border-slate-700 space-y-2">
+          ${receipt.items.map(it => `
+            <div>
+              <div class="flex justify-between font-bold text-slate-800 dark:text-slate-200">
+                <span class="truncate max-w-[200px]">${it.product_name_snapshot}</span>
+                <span>${it.line_total}</span>
+              </div>
+              <div class="flex justify-between text-[10px] text-slate-500">
+                <span>${it.quantity} x ${it.unit_price}</span>
+                ${it.serial_no_snapshot ? `<span class="text-purple-600 font-bold">SN: ${it.serial_no_snapshot}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Tax & Totals Breakdown -->
+        <div class="py-3 border-b border-dashed border-slate-300 dark:border-slate-700 space-y-1 text-slate-600 dark:text-slate-400">
+          <div class="flex justify-between"><span>Subtotal:</span><span>${receipt.subtotal}</span></div>
+          ${receipt.discount !== 'KES 0.00' ? `<div class="flex justify-between text-emerald-600"><span>Discount:</span><span>-${receipt.discount}</span></div>` : ''}
+          <div class="flex justify-between"><span>VAT (16% Included):</span><span>${receipt.tax}</span></div>
+          <div class="flex justify-between text-sm font-extrabold text-slate-900 dark:text-white pt-1"><span>TOTAL PAID:</span><span>${receipt.total}</span></div>
+        </div>
+
+        <!-- Barcode aesthetic -->
+        <div class="pt-4 text-center">
+          <div class="h-8 bg-slate-900 dark:bg-white inline-block w-48 opacity-75 mb-1" style="mask-image: repeating-linear-gradient(90deg, #000 0, #000 2px, transparent 2px, transparent 4px);"></div>
+          <p class="text-[9px] text-slate-400">Thank you for choosing Ndungu Electronics!</p>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('receiptDrawer').classList.remove('hidden');
+  }
+
+  function closeReceiptDrawer() {
+    document.getElementById('receiptDrawer').classList.add('hidden');
+  }
+
+  function printReceipt() {
+    window.print();
+  }
+</script>
+{% endblock %}
