@@ -37,7 +37,7 @@ In the PythonAnywhere Bash console:
 ```bash
 cd ~
 # If first time deployment:
-git clone https://github.com/augustinsanga/Ndungu_Electronics_Project.git
+git clone https://github.com/growthclipsco-jpg/Ndungu_Electronics_Project.git
 cd ~/Ndungu_Electronics_Project
 
 # If updating existing deployment:
